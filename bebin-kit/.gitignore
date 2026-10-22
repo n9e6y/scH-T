@@ -1,0 +1,10 @@
+.env
+data/raw/
+api/data/*.db
+api/data/*.db-*
+api/data/vectors/
+node_modules/
+.next/
+__pycache__/
+.pytest_cache/
+qa/screens/

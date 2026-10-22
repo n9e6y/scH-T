@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+/* Design tokens: docs/DESIGN_SYSTEM.md §2–4 (from design/exports/Bebin Identity Board.dc.html).
+   Two hues only: radish red and leaf green. Saturation = certainty. */
+@theme {
+  --color-soil: #1B2420;
+  --color-stem: #56615B;
+  --color-ash: #8E9892;
+  --color-ash-line: #C9D0CA;
+  --color-line: #E1E6E1;
+  --color-flesh: #F7F8F6;
+  --color-card: #FFFFFF;
+  --color-placeholder: #EEF1EE;
+
+  --color-radish: #C8385A;
+  --color-radish-hover: #B53050;
+  --color-radish-bright: #DE5274;
+  --color-radish-night: #F08CA4;
+  --color-radish-tint: #FBEFF2;
+  --color-beet: #6E1534;
+  --color-beet-tint: #F6E4EA;
+
+  --color-leaf: #5E8F3E;
+  --color-leaf-ink: #477532;
+  --color-leaf-tint: #EEF5E8;
+  --color-wilt: #6F6C3A;
+  --color-wilt-tint: #F2F1E3;
+  --color-stale-ink: #7A8079;
+  --color-stamp: #007A36;
+  --color-stamp-tint: #EAF5EC;
+  --color-stamp-wash: #F7FBF8;
+  --color-stamp-leader: #A9D3B6;
+
+  --font-sans: var(--font-vazirmatn), system-ui, sans-serif;
+  --font-display: var(--font-lalezar), var(--font-vazirmatn), sans-serif;
+
+  --text-display: 40px;
+  --text-display--line-height: 52px;
+  --text-title: 22px;
+  --text-title--line-height: 35px;
+  --text-heading: 17px;
+  --text-heading--line-height: 29px;
+  --text-body: 15px;
+  --text-body--line-height: 28px;
+  --text-caption: 12.5px;
+  --text-caption--line-height: 22px;
+  --text-micro: 11px;
+  --text-micro--line-height: 18px;
+
+  --radius-sheet: 24px;
+  --radius-card: 16px;
+  --radius-button: 12px;
+
+  --shadow-float: 0 1px 2px rgba(27, 36, 32, .06), 0 10px 28px -14px rgba(27, 36, 32, .24);
+  --shadow-hair: 0 1px 2px rgba(27, 36, 32, .10);
+
+  --animate-stamp: stamp-land 220ms ease-out both;
+  --animate-blink: lens-blink 1.2s ease-in-out infinite;
+  --animate-sheet: sheet-up 220ms ease-out both;
+}
+
+@keyframes stamp-land {
+  from { transform: scale(1.4) rotate(-14deg); opacity: 0; }
+  to { transform: scale(1) rotate(-6deg); opacity: 1; }
+}
+@keyframes lens-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .25; }
+}
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@layer base {
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--color-flesh);
+    color: var(--color-soil);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Persian numbers in prices line up in columns. */
+  .tabular { font-variant-numeric: tabular-nums; }
+  .pixelated { image-rendering: pixelated; }
+  .no-scrollbar { scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  :focus-visible { outline: 2px solid var(--color-radish); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; }
+  }
+}
