@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     llm_api_key: str = ""
     llm_model_assistant: str = ""
     llm_model_fast: str = ""
+    llm_max_tokens_per_day: int = 300_000
     embeddings_provider: str = "off"
     embeddings_model: str = ""
     embeddings_dim: int = 256
