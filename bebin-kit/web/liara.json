@@ -1,0 +1,5 @@
+{
+  "platform": "next",
+  "app": "bebin-web",
+  "port": 3000
+}

@@ -1,0 +1,6 @@
+{
+  "platform": "docker",
+  "app": "bebin-api",
+  "port": 8000,
+  "disks": [{ "name": "data", "mountTo": "/data" }]
+}
