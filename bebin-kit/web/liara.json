@@ -1,5 +1,5 @@
 {
-  "platform": "next",
+  "platform": "docker",
   "app": "bebin-web",
   "port": 3000
 }

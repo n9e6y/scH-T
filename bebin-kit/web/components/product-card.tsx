@@ -22,7 +22,7 @@ export function ProductCard({ p }: { p: Card }) {
         ) : (
           <span className="text-sm text-stem">قیمت ثبت نشده</span>
         )}
-        <span className="text-[11.5px] text-stem">قیمت ثبت‌شده · {faNum(p.seller_count)} فروشنده</span>
+        <span className="text-[11.5px] text-stem">قیمت ثبت‌شده، {faNum(p.seller_count)} فروشنده</span>
         <span className="mt-1 self-start"><Unknown size="sm">موجودی نامشخص</Unknown></span>
         <div className="mt-1"><ReasonLine reasons={p.reasons} /></div>
       </div>

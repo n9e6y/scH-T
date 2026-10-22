@@ -71,7 +71,7 @@ export function ContinueSection({ last }: { last: LastViewed }) {
           <span className="truncate text-sm font-semibold leading-relaxed">{last.title}</span>
           <span className="text-caption">
             {tomanRange(last.min, last.max) ? <><b className="font-bold">{tomanRange(last.min, last.max)}</b> تومان</> : "قیمت ثبت نشده"}
-            <span className="text-stem"> · ثبت‌شده · <span className="whitespace-nowrap">{faNum(last.sellers)} فروشنده</span></span>
+            <span className="text-stem">، ثبت‌شده، <span className="whitespace-nowrap">{faNum(last.sellers)} فروشنده</span></span>
           </span>
         </span>
       </div>
@@ -134,7 +134,7 @@ export function AroundYou({ onSetLocation }: { onSetLocation: () => void }) {
                 <Building size={22} color="var(--color-stem)" />
                 <span className="truncate text-[14.5px] font-bold">{m.name}</span>
                 <span className="text-xs text-stem">
-                  {distance(m.distance_m)}{m.eta_min != null && m.eta_min < 30 ? ` · ${duration(m.eta_min)} پیاده` : ""}
+                  {distance(m.distance_m)}{m.eta_min != null && m.eta_min < 30 ? `، ${duration(m.eta_min)} پیاده` : ""}
                 </span>
                 {m.open_count > 0 ? (
                   <span className="flex items-center gap-1.5 text-[12.5px] font-semibold text-leaf-ink">

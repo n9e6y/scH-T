@@ -96,7 +96,7 @@ export function StockTag({ stock, detail, onAsk }: { stock: Stock; detail?: stri
       <span className={`${pill} h-8 border-[1.5px] border-stamp bg-stamp-tint ps-1 pe-3 text-[12.5px] font-bold text-stamp`}>
         <MiniStamp size={24} />
         {detail ? `${detail} موجود` : "موجود است"}
-        {stock.verified_at && <span className="font-medium">· {timeFa(stock.verified_at)}</span>}
+        {stock.verified_at && <span className="font-medium">، ساعت {timeFa(stock.verified_at)}</span>}
       </span>
     );
   }
@@ -104,7 +104,7 @@ export function StockTag({ stock, detail, onAsk }: { stock: Stock; detail?: stri
     return (
       <span className={`${pill} h-[30px] bg-beet-tint px-3 text-[12.5px] font-bold text-beet`}>
         <Cross size={13} />ناموجود
-        {stock.verified_at && <span className="font-medium">· {timeFa(stock.verified_at)}</span>}
+        {stock.verified_at && <span className="font-medium">، ساعت {timeFa(stock.verified_at)}</span>}
       </span>
     );
   }
