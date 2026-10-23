@@ -8,6 +8,7 @@ from app import db, search, views
 
 # Tests never call the real provider (CLAUDE.md): the LLM is off unless `make eval`.
 os.environ["LLM_ENABLED"] = "false"
+os.environ["EMBEDDINGS_PROVIDER"] = "off"  # test_embeddings.py installs a fake index where it needs one
 
 FIXTURE = Path(__file__).parent / "fixtures" / "mini_catalog.db"
 

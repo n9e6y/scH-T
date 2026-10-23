@@ -6,6 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app import embeddings
 from app.config import get_settings
 from app.inquiries import engine
 from app.routers import assistant, catalog, inquiries, meta
@@ -13,9 +14,11 @@ from app.routers import assistant, catalog, inquiries, meta
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    """Start the inquiry scheduler and re-queue whatever was pending before a restart."""
+    """Start the inquiry scheduler and re-queue whatever was pending before a restart.
+    The vector index (if any) loads in a thread so the first search doesn't pay for it."""
     engine.hub.loop = asyncio.get_running_loop()
     engine.rehydrate()
+    asyncio.get_running_loop().run_in_executor(None, embeddings.index)
     task = asyncio.create_task(engine.scheduler.run())
     yield
     task.cancel()

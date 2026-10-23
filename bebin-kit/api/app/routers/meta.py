@@ -6,7 +6,7 @@ import httpx
 from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
 
-from app import clock
+from app import clock, embeddings, llm
 from app.config import get_settings
 from app.db import catalog, meta
 from app.models import Area, CategoryGroup, Caveat, Meta
@@ -63,7 +63,9 @@ def get_meta(request: Request):
     s = get_settings()
     m = meta()
     return Meta(snapshot_date=m["snapshot_date"], counts=json.loads(m["counts"]),
-                flags={"llm_enabled": s.llm_configured, "embeddings": s.embeddings_provider,
+                flags={"llm_enabled": s.llm_configured,
+                       "embeddings": s.embeddings_provider if embeddings.available() else "off",
+                       "search_mode": "hybrid" if embeddings.available() and llm.available() else "fts",
                        "simulator": s.simulator_enabled, "simulator_speed": s.simulator_speed,
                        "demo_director": s.demo_director_enabled},
                 caveats=CAVEATS, now=clock.now(request).isoformat())

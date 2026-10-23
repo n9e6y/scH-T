@@ -22,8 +22,8 @@ demo-candidates:
 profile:
 	$(PY) data/profile.py
 
-embeddings:
-	@echo "EMBEDDINGS_PROVIDER=off until scripts/check_llm.py confirms support (docs/LLM_CAPABILITIES.md)"
+embeddings:  # ≈10M provider tokens for the full catalog; resumable (api/data/vectors/parts/)
+	$(PY) data/build_embeddings.py
 
 api:
 	$(UV) run uvicorn app.main:app --reload --port 8000

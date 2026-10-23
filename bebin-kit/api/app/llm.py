@@ -111,6 +111,30 @@ def chat_json_sync(system: str, user: str, max_tokens: int = 300, timeout: float
         raise LLMUnavailable("bad json") from e
 
 
+def embed(texts: list[str], timeout: float = TIMEOUT_FAST, offline: bool = False) -> tuple[list[list[float]], int]:
+    """Embeddings for `texts` (EMBEDDINGS_MODEL at EMBEDDINGS_DIM). Returns (vectors, tokens).
+    `offline` is for the one-off index build: it skips the daily guard and the app.db usage counter."""
+    s = get_settings()
+    if not offline:
+        check()
+    elif not s.llm_configured:
+        raise LLMUnavailable("unconfigured")
+    model = s.embeddings_model or "text-embedding-3-small"
+    started = time.time()
+    try:
+        r = sync_client().embeddings.create(model=model, input=texts, dimensions=s.embeddings_dim, timeout=timeout)
+    except Exception as e:
+        log.warning("llm embed failed: %s", type(e).__name__)
+        raise LLMUnavailable(str(e)) from e
+    tokens = int(getattr(r.usage, "total_tokens", 0) or 0)
+    if offline:
+        log.info("llm embed model=%s n=%d tokens=%d latency_ms=%d", model, len(texts), tokens,
+                 int((time.time() - started) * 1000))
+    else:
+        record(model, r.usage, started, "embed")
+    return [d.embedding for d in sorted(r.data, key=lambda d: d.index)], tokens
+
+
 def cached(namespace: str, key_parts, compute):
     """Return the cached value for (namespace, key) or compute, store and return it. Failures aren't cached."""
     _ensure_tables()

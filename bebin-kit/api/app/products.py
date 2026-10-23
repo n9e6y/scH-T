@@ -6,7 +6,7 @@ import math
 import re
 from collections import Counter
 
-from app import fa, freshness
+from app import embeddings, fa, freshness
 from app.db import catalog
 from app.geo import haversine_m
 from app.models import (CompareColumn, CompareOut, CompareRow, PriceRange, ProductCard, ProductDetail, Spec,
@@ -78,14 +78,28 @@ def similar(product_id: str, k: int = 10, lat: float | None = None, lng: float |
     p = con.execute("SELECT * FROM products WHERE product_id=?", (product_id,)).fetchone()
     if not p:
         return None
-    pool = con.execute("SELECT * FROM products WHERE category=? AND product_id<>? ORDER BY offer_count DESC LIMIT ?",
-                       (p["category"], product_id, SIMILAR_POOL)).fetchall()
+    # With vectors the pool is the category's nearest neighbours and cosine replaces title-token overlap.
+    cos = None
+    if embeddings.available():
+        rids = [r[0] for r in con.execute("SELECT rid FROM products WHERE category=? AND product_id<>?",
+                                          (p["category"], product_id))]
+        cos = embeddings.similarity(p["rid"], rids)
+    if cos:
+        near_rids = sorted(cos, key=lambda r: -cos[r])[:SIMILAR_POOL]
+        pool = con.execute(f"SELECT * FROM products WHERE rid IN ({','.join('?' * len(near_rids))})",
+                           near_rids).fetchall()
+    else:
+        pool = con.execute("SELECT * FROM products WHERE category=? AND product_id<>? ORDER BY offer_count DESC "
+                           "LIMIT ?", (p["category"], product_id, SIMILAR_POOL)).fetchall()
     base_tokens, base_specs, base_price = _tokens(p["title_fa"]), _spec_pairs(p["specs"]), p["min_price"]
     base_brand = normalize_fa(p["brand"] or "")
     scored = []
     for q in pool:
-        tok = _tokens(q["title_fa"])
-        title_j = len(base_tokens & tok) / max(1, len(base_tokens | tok))
+        if cos:  # text-embedding-3-small: unrelated titles sit near 0.5, near-duplicates above 0.9
+            title_j = min(1.0, max(0.0, (cos[q["rid"]] - 0.5) / 0.4))
+        else:
+            tok = _tokens(q["title_fa"])
+            title_j = len(base_tokens & tok) / max(1, len(base_tokens | tok))
         sp = _spec_pairs(q["specs"])
         spec_j = len(base_specs & sp) / max(1, len(base_specs | sp)) if base_specs and sp else 0
         brand_same = bool(base_brand) and normalize_fa(q["brand"] or "") == base_brand

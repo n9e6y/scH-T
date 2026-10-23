@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from functools import lru_cache
 
-from app import fa, freshness
+from app import embeddings, fa, freshness
 from app.db import catalog
 from app.geo import haversine_m
 from app.hours import open_status
@@ -139,6 +139,10 @@ def _candidates(text: str, cat: str | None) -> list[tuple[int, float]]:
             for r in con.execute(f"SELECT rid FROM products WHERE category IN ({ph}) ORDER BY offer_count DESC "
                                  f"LIMIT ?", (*cats, CANDIDATES // 2)):
                 found.setdefault(r[0], best)
+        # Hybrid (EMBEDDINGS_PROVIDER=api): vectors catch synonyms and spellings FTS misses; None → FTS only.
+        vec = embeddings.search(text, CANDIDATES)
+        if vec:
+            found = embeddings.fuse(found, vec)
         return list(found.items())
     if cat:
         rows = con.execute("SELECT rid FROM products WHERE category_group=? OR category=? "

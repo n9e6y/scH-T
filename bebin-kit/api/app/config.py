@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     catalog_db_path: str = "api/data/catalog.db"
     app_db_path: str = "api/data/app.db"
     vectors_dir: str = "api/data/vectors"
+    # Liara caps source uploads at 128 MB, so the deployed API pulls the vector files from a private bucket
+    # into vectors_dir (on the data disk) once; later boots find them there.
+    s3_endpoint: str = ""
+    s3_bucket: str = ""
+    s3_access_key: str = ""
+    s3_secret_key: str = ""
     cors_origins: str = "http://localhost:3000"
     simulator_enabled: bool = True
     simulator_speed: float = 1.0
