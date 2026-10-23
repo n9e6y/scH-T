@@ -1,14 +1,9 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="bebin-kit/web/public/brand/lockup-bebin-glasses-night.svg" />
-    <img src="bebin-kit/web/public/brand/lockup-bebin-glasses.svg" height="72" alt="ببین" />
-  </picture>
-</p>
+
 
 <p align="center">
   <img src="bebin-kit/web/public/mascot/torobche-default.svg" width="64" alt="تربچه, the pixel radish" />
 </p>
-
+<h3 align="center">Bebin-ببین</h3>
 <h3 align="center">An in-person shopping assistant for Torob</h3>
 
 <p align="center">
