@@ -19,13 +19,14 @@ from app.db import catalog
 
 log = logging.getLogger("bebin.embeddings")
 RRF_K = 60
-CHUNK = 16384  # float16 rows are upcast per chunk: ~12 ms for 226k×256 and no float32 copy of the matrix
 QUERY_TIMEOUT = 2.5  # the provider answers in ~1.1–1.4 s; past this, FTS alone is the better experience
 
 
 @dataclass
 class Index:
-    mat: np.ndarray  # N×d float16, rows L2-normalised
+    # N×d float32, rows L2-normalised. Stored as float16 on disk but upcast once at load (231 MB): on Liara's
+    # CPU, upcasting per query took 3.5 s, while a float32 matvec takes ~0.2 s.
+    mat: np.ndarray
     rids: np.ndarray  # N int64, catalog rowids (-1: product no longer in the catalog)
     row_of: dict[int, int]
     info: dict
@@ -39,14 +40,20 @@ _loaded = False
 FILES = ("products_f16.npy", "product_ids.npy", "info.json")
 
 
+def s3_client():
+    import boto3  # only in the Docker image; local dev reads api/data/vectors directly
+    s = get_settings()
+    endpoint = s.s3_endpoint if "://" in s.s3_endpoint else f"https://{s.s3_endpoint}"  # Liara shows a bare host
+    return boto3.client("s3", endpoint_url=endpoint, aws_access_key_id=s.s3_access_key,
+                        aws_secret_access_key=s.s3_secret_key)
+
+
 def _fetch_remote(d) -> None:
     """Download missing vector files from the private bucket (S3_* settings) into `d`."""
     s = get_settings()
     if not (s.s3_endpoint and s.s3_bucket and s.s3_access_key) or all((d / f).exists() for f in FILES):
         return
-    import boto3  # only in the Docker image; local dev reads api/data/vectors directly
-    s3 = boto3.client("s3", endpoint_url=s.s3_endpoint, aws_access_key_id=s.s3_access_key,
-                      aws_secret_access_key=s.s3_secret_key)
+    s3 = s3_client()
     d.mkdir(parents=True, exist_ok=True)
     for f in FILES:
         if not (d / f).exists():
@@ -75,7 +82,7 @@ def index() -> Index | None:
                 log.warning("vectors not downloaded: %s", e)
         if s.embeddings_provider == "api" and (d / "products_f16.npy").exists():
             try:
-                mat = np.load(d / "products_f16.npy")
+                mat = np.load(d / "products_f16.npy").astype(np.float32)
                 pids = np.load(d / "product_ids.npy")
                 rid_of = {r[0]: r[1] for r in catalog().execute("SELECT product_id, rid FROM products")}
                 rids = np.array([rid_of.get(str(p), -1) for p in pids], dtype=np.int64)
@@ -114,7 +121,7 @@ def query_vector(text: str) -> np.ndarray | None:
 
 def _scores(v: np.ndarray, rows: np.ndarray | None = None) -> np.ndarray:
     m = index().mat if rows is None else index().mat[rows]
-    return np.concatenate([m[i:i + CHUNK].astype(np.float32) @ v for i in range(0, len(m), CHUNK)])
+    return m @ v
 
 
 def search(text: str, k: int) -> list[int] | None:
@@ -137,7 +144,7 @@ def similarity(rid: int, others: list[int]) -> dict[int, float] | None:
     rows = [(o, idx.row_of[o]) for o in others if o in idx.row_of]
     if not rows:
         return {}
-    sc = _scores(idx.mat[idx.row_of[rid]].astype(np.float32), np.array([r for _, r in rows]))
+    sc = _scores(idx.mat[idx.row_of[rid]], np.array([r for _, r in rows]))
     return {o: float(s) for (o, _), s in zip(rows, sc)}
 
 

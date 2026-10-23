@@ -31,7 +31,7 @@ def fake_index(client, monkeypatch):
     mat = rng.normal(size=(len(rows), 16)).astype(np.float32)
     mat /= np.linalg.norm(mat, axis=1, keepdims=True)
     rids = np.array([r[0] for r in rows], dtype=np.int64)
-    idx = embeddings.Index(mat.astype(np.float16), rids, {int(r): i for i, r in enumerate(rids)}, {})
+    idx = embeddings.Index(mat, rids, {int(r): i for i, r in enumerate(rids)}, {})
     target = len(rows) // 2  # the query vector points straight at this product
     monkeypatch.setattr(embeddings, "_index", idx)
     monkeypatch.setattr(embeddings, "_loaded", True)
