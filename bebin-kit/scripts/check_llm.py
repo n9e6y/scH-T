@@ -140,6 +140,7 @@ def main():
               f"- `EMBEDDINGS_PROVIDER={'api' if emb_ok else 'off'}` · `EMBEDDINGS_MODEL={EMBED_MODEL}`"
               f" · dimensions param {'supported' if dims_ok else 'NOT supported (use PCA)'}",
               f"- Assistant mode: {'tool calling' if passed.get((assistant, 'tool calling')) else 'JSON intent router'}"]
+    OUT.parent.mkdir(parents=True, exist_ok=True)  # docs/ isn't in git; a fresh clone lacks it
     OUT.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"wrote {OUT}")
 

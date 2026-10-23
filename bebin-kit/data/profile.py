@@ -39,6 +39,7 @@ def main():
             ex = " · ".join(v[:60].replace("|", "/").replace("\n", " ") for v in s[~empty].drop_duplicates().head(3))
             lines.append(f"| {c} | {empty.mean():.1%} | {s.nunique():,} | {fmt('text', s)} | {ex} |")
         lines.append("")
+    OUT.parent.mkdir(parents=True, exist_ok=True)  # docs/ isn't in git; a fresh clone lacks it
     OUT.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {OUT}")
 

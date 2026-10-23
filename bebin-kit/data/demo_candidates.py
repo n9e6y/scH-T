@@ -109,6 +109,7 @@ def main():
     L += ["## Real-name shops (Instagram / website)", "", "| shop | link | area | offers |", "|---|---|---|---|"]
     for r in real:
         L.append(f"| {r['name']} `{r['shop_id']}` | {r['instagram'] or r['website']} | {r['area']} | {r['offer_count']} |")
+    OUT.parent.mkdir(parents=True, exist_ok=True)  # docs/ isn't in git; a fresh clone lacks it
     OUT.write_text("\n".join(L) + "\n", encoding="utf-8")
     print(f"wrote {OUT} with {len(picked)} scenarios")
 

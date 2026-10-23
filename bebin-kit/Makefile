@@ -2,7 +2,7 @@
 PY := api/.venv/bin/python
 UV := cd api && uv
 
-.PHONY: setup data data-sample demo-candidates profile embeddings api web test types check-llm smoke bench eval
+.PHONY: setup data data-sample demo-candidates profile embeddings upload-vectors api web test types check-llm smoke bench eval
 
 setup:
 	$(UV) sync
@@ -24,6 +24,11 @@ profile:
 
 embeddings:  # ≈10M provider tokens for the full catalog; resumable (api/data/vectors/parts/)
 	$(PY) data/build_embeddings.py
+
+upload-vectors:  # api/data/vectors → s3://$S3_BUCKET/vectors/ (the deployed API downloads them on first boot)
+	$(UV) run --with boto3 python -c "from app.config import get_settings; from app.embeddings import s3_client, FILES; \
+	s = get_settings(); d = s.path(s.vectors_dir); c = s3_client(); \
+	[(c.upload_file(str(d / f), s.s3_bucket, 'vectors/' + f), print('uploaded', f)) for f in FILES]"
 
 api:
 	$(UV) run uvicorn app.main:app --reload --port 8000

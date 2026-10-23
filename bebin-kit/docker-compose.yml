@@ -1,0 +1,32 @@
+# Run ببین locally from the same Dockerfiles used in production.
+#   make data                 # build api/data/catalog.db first (it is baked into the API image)
+#   docker compose up --build # web → http://localhost:3000, API → http://localhost:8000/api/docs
+# Ports: API_PORT / WEB_PORT override 8000 / 3000. The LLM and other settings come from .env.
+services:
+  api:
+    build: ./api
+    env_file: .env
+    environment:
+      # Container paths win over the host-relative ones in .env.
+      CATALOG_DB_PATH: /srv/data/catalog.db
+      APP_DB_PATH: /data/app.db
+      VECTORS_DIR: /vectors
+      CORS_ORIGINS: http://localhost:${WEB_PORT:-3000}
+    volumes:
+      - api-data:/data                    # app.db: inquiries, verifications, LLM cache
+      - ./api/data/vectors:/vectors       # hybrid search, if `make embeddings` was run (else FTS only)
+    ports:
+      - "${API_PORT:-8000}:8000"
+
+  web:
+    build:
+      context: ./web
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:${API_PORT:-8000}   # compiled into the bundle; the browser calls it
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      - api
+
+volumes:
+  api-data:
