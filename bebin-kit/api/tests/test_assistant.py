@@ -50,15 +50,15 @@ def test_only_first_search_becomes_a_block(client):
 
 
 def test_search_block_stays_relevant_and_links_with_its_filters(client):
-    """A sort from the model reorders only the top relevant matches, and «همه‌ی نتیجه‌ها» keeps the filters."""
+    """The 3 suggestions are the search page's top 3 (even if the model sends a sort), and the link keeps the filters."""
     from app import search
     args = {"query": "گوشی", "installments": True, "max_price": 90_000_000}
     ctx = lambda: tools.Ctx(at=AT, lat=35.6921, lng=51.4225, location_name="فردوسی")  # noqa: E731
     rel = tools.run(ctx(), "search_products", json.dumps(args))
     near = tools.run(ctx(), "search_products", json.dumps({**args, "sort": "nearest"}))
-    relevant = search.search(search.Params(q="گوشی", pay=["installments"], max=90_000_000, lat=35.6921, lng=51.4225), AT)
-    top = {c.id for c in relevant.items[:tools.RESORT_POOL]}
-    assert [c.id for c in rel.blocks[0].items] == [c.id for c in relevant.items[:3]]
-    assert {c.id for c in near.blocks[0].items} <= top
+    page = search.search(search.Params(q="گوشی", pay=["installments"], max=90_000_000, lat=35.6921, lng=51.4225), AT)
+    top3 = [c.id for c in page.items[:3]]
+    assert [c.id for c in rel.blocks[0].items] == top3
+    assert [c.id for c in near.blocks[0].items] == top3
     link = rel.blocks[0].search
     assert "pay=installments" in link and "max=90000000" in link and "sort" not in link

@@ -26,8 +26,7 @@ SCHEMAS = [
                                                        "Keep brand spellings as the user wrote them (don't switch to Latin), "
                                                        "and leave out places and filters (use the other fields)."},
             "max_price": {"type": "integer"}, "min_price": {"type": "integer"},
-            "installments": {"type": "boolean"}, "open_now": {"type": "boolean"},
-            "sort": {"type": "string", "enum": ["relevance", "cheapest", "nearest", "most_sellers"]}},
+            "installments": {"type": "boolean"}, "open_now": {"type": "boolean"}},
             "required": ["query"]}}},
     {"type": "function", "function": {
         "name": "find_sellers",
@@ -102,23 +101,16 @@ def _card_brief(c) -> dict:
             "freshest_price": c.freshest, "reasons": c.reasons}
 
 
-RESORT_POOL = 12  # «ارزان‌ترین/نزدیک‌ترین» reorder only this many relevant matches
-
-
 def search_products(ctx: Ctx, query: str, max_price: int | None = None, min_price: int | None = None,
-                    installments: bool = False, open_now: bool = False, sort: str = "relevance") -> Result:
-    # Always rank by relevance. A whole-set sort let the model's sort="nearest" (for «نزدیک فردوسی») put the
-    # nearest accessories first, so the 3 suggestions didn't match «همه‌ی نتیجه‌ها» on the search page.
+                    installments: bool = False, open_now: bool = False, **_ignored) -> Result:
+    # Always the search page's «مرتبط‌ترین» order, so the 3 suggestions are the top 3 of «همه‌ی نتیجه‌ها».
+    # A model-chosen sort="nearest" (for «نزدیک فردوسی») used to put the nearest accessories first; distance
+    # belongs to find_sellers. `**_ignored` absorbs a `sort` from older prompts or a creative model.
     pay = ["installments"] if installments else []
     p = search.Params(q=query, min=min_price, max=max_price, pay=pay, open=open_now, lat=ctx.lat, lng=ctx.lng)
     out = search.search(p, ctx.at)
     ctx.searches += 1
     ranked = list(out.items)
-    key = {"cheapest": lambda c: (c.price_range.min is None, c.price_range.min or 0),
-           "nearest": lambda c: (c.nearest_distance_m is None, c.nearest_distance_m or 0),
-           "most_sellers": lambda c: -c.seller_count}.get(sort)
-    if key:
-        ranked = sorted(ranked[:RESORT_POOL], key=key) + ranked[RESORT_POOL:]
     items = ranked[:3] if ctx.searches == 1 else []
     for c in items:
         ctx.seen_products[c.id] = c.title
