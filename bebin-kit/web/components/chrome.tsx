@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { create } from "zustand";
+import { useUnread } from "@/lib/live";
 import { useApp } from "@/lib/store";
 import { Lockup } from "./brand";
 import { ChevronDown, ChevronUp, Close, NavAssistant, NavFollowups, NavHome, NavPlan, Pin } from "./icons";
@@ -15,12 +16,13 @@ const TABS = [
   { href: "/plan", label: "برنامه من", Icon: NavPlan },
 ];
 
-export function BottomNav({ unread = 0 }: { unread?: number }) {
+export function BottomNav() {
   const path = usePathname();
+  const unread = useUnread();
   return (
     <nav aria-label="پیمایش اصلی" className="grid flex-none grid-cols-4 border-t border-line bg-card px-2 pt-2 pb-[max(8px,env(safe-area-inset-bottom))]">
       {TABS.map(({ href, label, Icon }) => {
-        const active = href === "/" ? path === "/" : path.startsWith(href);
+        const active = href === "/" ? !TABS.some((t) => t.href !== "/" && path.startsWith(t.href)) : path.startsWith(href);
         return (
           <Link key={href} href={href} aria-current={active ? "page" : undefined}
             className="flex min-h-[52px] flex-col items-center gap-1 py-1">
@@ -59,15 +61,19 @@ export function LocationChip({ onClick, open = false }: { onClick: () => void; o
 export function TopBar({ onLocation, locationOpen }: { onLocation: () => void; locationOpen?: boolean }) {
   return (
     <header className="flex h-14 flex-none items-center justify-between ps-4 pe-5">
-      <Link href="/" aria-label="ببین، خانه"><Lockup size={32} /></Link>
+      <Link href="/about" aria-label="درباره‌ی ببین"><Lockup size={32} /></Link>
       <LocationChip onClick={onLocation} open={locationOpen} />
     </header>
   );
 }
 
 /** Sheet with a drag handle; closes on backdrop tap and Escape. Radius 24 on top corners, the one shadow. */
-export function BottomSheet({ open, onClose, title, children, footer }:
-  { open: boolean; onClose: () => void; title: string; children: React.ReactNode; footer?: React.ReactNode }) {
+export function BottomSheet({ open, onClose, title, children, footer, action, top }:
+  { open: boolean; onClose: () => void; title: string; children: React.ReactNode; footer?: React.ReactNode;
+    /** Replaces the close button, e.g. «پاک کردن همه». Backdrop tap and Escape still close. */
+    action?: React.ReactNode;
+    /** Fixed distance from the top (px) for tall sheets (filters 64, why-sheet 110). */
+    top?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
@@ -81,15 +87,18 @@ export function BottomSheet({ open, onClose, title, children, footer }:
     <div className="fixed inset-0 z-40 mx-auto max-w-[480px]">
       <div className="absolute inset-0 bg-soil/40" onClick={onClose} aria-hidden />
       <div ref={ref} role="dialog" aria-modal aria-label={title} tabIndex={-1}
-        className="absolute inset-x-0 bottom-0 flex max-h-[90dvh] animate-sheet flex-col rounded-t-sheet bg-card shadow-float outline-none">
+        style={top != null ? { top } : undefined}
+        className={`absolute inset-x-0 bottom-0 flex animate-sheet flex-col rounded-t-sheet bg-card shadow-float outline-none ${top != null ? "" : "max-h-[90dvh]"}`}>
         <div className="flex flex-none flex-col gap-3.5 px-4 pt-2.5">
           <span className="h-[5px] w-10 self-center rounded-full bg-line" aria-hidden />
           <div className="flex items-center justify-between px-1">
             <h2 className="text-lg font-bold">{title}</h2>
-            <button type="button" onClick={onClose} aria-label="بستن"
-              className="flex size-11 items-center justify-center rounded-full bg-flesh">
-              <Close size={16} color="var(--color-stem)" />
-            </button>
+            {action ?? (
+              <button type="button" onClick={onClose} aria-label="بستن"
+                className="flex size-11 items-center justify-center rounded-full bg-flesh">
+                <Close size={16} color="var(--color-stem)" />
+              </button>
+            )}
           </div>
         </div>
         <div className="no-scrollbar flex min-h-0 flex-1 flex-col gap-3.5 overflow-y-auto px-4 pt-3.5 pb-3 [&>*]:shrink-0">{children}</div>
@@ -100,27 +109,31 @@ export function BottomSheet({ open, onClose, title, children, footer }:
 }
 
 // ---------------------------------------------------------------- toasts
-type ToastItem = { id: number; text: string; action?: { label: string; onClick: () => void } };
+type ToastItem = { id: number; text: string; sub?: string; icon?: React.ReactNode; action?: { label: string; onClick: () => void } };
 export const useToasts = create<{ items: ToastItem[]; push: (t: Omit<ToastItem, "id">) => void; dismiss: (id: number) => void }>(
   (set) => ({
     items: [],
     push: (t) => {
       const id = Date.now();
       set((s) => ({ items: [...s.items, { ...t, id }] }));
-      setTimeout(() => set((s) => ({ items: s.items.filter((x) => x.id !== id) })), 5000);
+      setTimeout(() => set((s) => ({ items: s.items.filter((x) => x.id !== id) })), 2600);
     },
     dismiss: (id) => set((s) => ({ items: s.items.filter((x) => x.id !== id) })),
   }),
 );
 
-/** Soil surface, action in radish-night (DESIGN_SYSTEM §2). */
+/** Soil surface, radius 16, 104px above the bottom (over the nav); action in radish-night. Auto-hide 2.6s. */
 export function ToastHost() {
   const { items, dismiss } = useToasts();
   return (
-    <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-24 z-50 mx-auto flex max-w-[480px] flex-col gap-2 px-4">
+    <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-[104px] z-50 mx-auto flex max-w-[480px] flex-col gap-2 px-4">
       {items.map((t) => (
-        <div key={t.id} className="pointer-events-auto flex min-h-12 items-center gap-3 rounded-button bg-soil px-4 py-2 text-sm text-flesh shadow-float">
-          <span className="flex-1">{t.text}</span>
+        <div key={t.id} className="pointer-events-auto flex min-h-[52px] animate-sheet items-center gap-3 rounded-card bg-soil py-2 ps-4 pe-2 text-sm font-semibold text-flesh shadow-float">
+          {t.icon}
+          <span className="flex min-w-0 flex-1 flex-col">
+            <span className={t.sub ? "text-[14.5px] font-bold" : ""}>{t.text}</span>
+            {t.sub && <span className="truncate text-xs font-normal text-leader">{t.sub}</span>}
+          </span>
           {t.action && (
             <button type="button" className="min-h-11 px-1 font-bold text-radish-night"
               onClick={() => { t.action!.onClick(); dismiss(t.id); }}>{t.action.label}</button>

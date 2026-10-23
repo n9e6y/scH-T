@@ -58,8 +58,7 @@ export function ContinueSection({ last }: { last: LastViewed }) {
         <h2 className="text-base font-bold">ادامه بده</h2>
         <Link href="/inquiries" className="text-[13px] font-semibold text-radish">همه پیگیری‌ها</Link>
       </div>
-      {/* Links to /p/[id] once the product page is designed (prompt 4). */}
-      <div className="flex items-center gap-3 rounded-card bg-card p-3">
+      <Link href={`/product/${last.id}`} className="flex items-center gap-3 rounded-card bg-card p-3">
         {last.image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={last.image} alt="" width={60} height={60} loading="lazy" className="size-[60px] flex-none rounded-button object-cover" />
@@ -74,7 +73,7 @@ export function ContinueSection({ last }: { last: LastViewed }) {
             <span className="text-stem">، ثبت‌شده، <span className="whitespace-nowrap">{faNum(last.sellers)} فروشنده</span></span>
           </span>
         </span>
-      </div>
+      </Link>
     </section>
   );
 }
@@ -130,7 +129,7 @@ export function AroundYou({ onSetLocation }: { onSetLocation: () => void }) {
         <div className="no-scrollbar flex gap-2.5 overflow-x-auto px-4">
           {(isLoading ? Array(2).fill(null) : malls ?? []).map((m, i) =>
             m ? (
-              <div key={m.id} className="flex w-[196px] flex-none flex-col gap-1.5 rounded-card bg-card p-3.5">
+              <Link key={m.id} href={`/mall/${m.id}`} className="flex w-[196px] flex-none flex-col gap-1.5 rounded-card bg-card p-3.5">
                 <Building size={22} color="var(--color-stem)" />
                 <span className="truncate text-[14.5px] font-bold">{m.name}</span>
                 <span className="text-xs text-stem">
@@ -143,7 +142,7 @@ export function AroundYou({ onSetLocation }: { onSetLocation: () => void }) {
                 ) : (
                   <span className="text-[12.5px] text-stem">الان فروشگاه بازی ثبت نشده</span>
                 )}
-              </div>
+              </Link>
             ) : (
               <div key={i} className="h-[124px] w-[196px] flex-none rounded-card bg-card" aria-hidden />
             ),

@@ -93,7 +93,7 @@ export function PriceBlock({ price, onAsk, label = true }: { price: Price; onAsk
 export function StockTag({ stock, detail, onAsk }: { stock: Stock; detail?: string; onAsk?: () => void }) {
   if (stock.state === "in_stock") {
     return (
-      <span className={`${pill} h-8 border-[1.5px] border-stamp bg-stamp-tint ps-1 pe-3 text-[12.5px] font-bold text-stamp`}>
+      <span className={`${pill} h-8 border-[1.5px] border-stamp-ink bg-stamp-tint ps-1 pe-3 text-[12.5px] font-bold text-stamp`}>
         <MiniStamp size={24} />
         {detail ? `${detail} موجود` : "موجود است"}
         {stock.verified_at && <span className="font-medium">، ساعت {timeFa(stock.verified_at)}</span>}
@@ -200,17 +200,22 @@ export function ReasonLine({ reasons }: { reasons?: string[] }) {
 }
 
 // ---------------------------------------------------------------- the stamp
-/** The full «مهر». Lands with the signature motion (scale 1.4→1, rotate −14°→−6°, 220ms). */
-export function VerifiedStamp({ time, caption, land = false }: { time: string; caption?: string; land?: boolean }) {
+/** The full «مهر» (hero 168). Lands: scale 1.4→1, rotate −14°→−6°, 220ms; then a 600ms ink ring. */
+export function VerifiedStamp({ time, caption, land = false, size = 168 }:
+  { time: string; caption?: string; land?: boolean; size?: number }) {
   return (
-      <div className={`flex size-[188px] flex-none -rotate-[8deg] items-center justify-center rounded-full border-4 border-stamp ${land ? "animate-stamp" : ""}`}>
-        <div className="flex size-[166px] flex-col items-center justify-center gap-1.5 rounded-full border-[1.5px] border-stamp text-stamp">
-          <span className="text-sm font-extrabold">تأیید فروشنده</span>
+    <div className="relative flex-none" style={{ width: size, height: size }}>
+      {land && <span className="absolute inset-0 animate-ink-ring rounded-full border-4 border-stamp-ink" aria-hidden />}
+      <div className={`flex size-full -rotate-6 items-center justify-center rounded-full border-4 border-stamp-ink ${land ? "animate-stamp" : ""}`}>
+        <div className="flex flex-col items-center justify-center gap-1 rounded-full border-[1.5px] border-stamp-ink text-stamp"
+          style={{ width: size - 20, height: size - 20 }}>
+          <span className="text-[13px] font-extrabold">تأیید فروشنده</span>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={miniRadish} width={36} height={36} alt="" className="pixelated" />
-          <span className="text-[22px] font-extrabold leading-tight">{faDigits(time)}</span>
+          <span className="text-[21px] font-extrabold leading-tight">{faDigits(time)}</span>
           {caption && <span className="text-[11px] font-semibold">{caption}</span>}
         </div>
       </div>
+    </div>
   );
 }

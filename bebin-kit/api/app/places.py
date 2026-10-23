@@ -8,7 +8,8 @@ from app import fa
 from app.db import catalog
 from app.geo import bbox, eta_min, haversine_m, route_km
 from app.hours import weekday_index
-from app.models import (HoursDay, MallDetail, MallFloor, MallNear, MallShop, ShopDetail, ShopOffer, ShopOffersOut)
+from app.models import (HoursDay, MallDetail, MallFloor, MallNear, MallShop, ShopDetail, ShopOffer, ShopOffersOut,
+                        ShopVerification)
 from app.text import normalize_fa
 from app.views import first_image, open_status_view, payment_view, price_view, shop_ref, week_of
 
@@ -16,7 +17,7 @@ PAGE_SIZE = 20
 UNKNOWN_FLOOR = "طبقه ثبت نشده"
 
 
-def shop_detail(shop_id: str, at: datetime) -> ShopDetail | None:
+def shop_detail(shop_id: str, at: datetime, lat: float | None = None, lng: float | None = None) -> ShopDetail | None:
     r = catalog().execute("SELECT * FROM shops WHERE shop_id=?", (shop_id,)).fetchone()
     if not r:
         return None
@@ -30,7 +31,38 @@ def shop_detail(shop_id: str, at: datetime) -> ShopDetail | None:
                           is_today=d == today) for d in range(7)]
     return ShopDetail(shop=shop_ref(r), categories=json.loads(r["categories"] or "[]"), address=r["address"],
                       open_status=open_status_view(r, at), hours=hours, payment=payment_view(r), phone=r["phone"],
-                      instagram=r["instagram"], website=r["website"], offer_count=r["offer_count"])
+                      instagram=r["instagram"], website=r["website"], offer_count=r["offer_count"],
+                      verifications=shop_verifications(shop_id, at), **_trip(lat, lng, r["lat"], r["lng"]))
+
+
+def shop_verifications(shop_id: str, at: datetime) -> list[ShopVerification]:
+    """«تأییدهای اخیر»: green only on the day they were made, then «قدیمی شده»."""
+    from app import verify
+    from app.inquiries.views import hm
+    out = []
+    cutoff = verify.day_start(at)
+    con = catalog()
+    for v in verify.for_shop(shop_id):
+        name = ""
+        if v["product_id"]:
+            p = con.execute("SELECT title_fa, model FROM products WHERE product_id=?", (v["product_id"],)).fetchone()
+            name = (p["model"] or p["title_fa"]) if p else ""
+        today = v["verified_at"] >= cutoff
+        when = hm(v["verified_at"]) if today else (fa.jalali(v["verified_at"]) + "، قدیمی شده")
+        f, val = v["field"], v["value"]
+        if f == "price":
+            text, value = f"قیمت {name} تأیید شد، {when}", fa.number(int(val))
+        elif f == "stock":
+            what = f"{name} {fa.digits(v['detail'])}".strip() if v["detail"] else name
+            text, value = (f"موجودی {what} تأیید شد، {when}" if val == "in_stock" else f"ناموجود بودن {what}، {when}"), None
+        elif f == "location":
+            text, value = f"جای دقیق: {val}، {when}", None
+        elif f == "hours_today":
+            text, value = f"ساعت امروز: {val}، {when}", None
+        else:
+            text, value = f"اقساط: {val}، {when}", None
+        out.append(ShopVerification(text=text, value=value, verified_at=v["verified_at"], today=today))
+    return out
 
 
 def shop_offers(shop_id: str, q: str = "", page: int = 1) -> ShopOffersOut:
@@ -49,7 +81,7 @@ def shop_offers(shop_id: str, q: str = "", page: int = 1) -> ShopOffersOut:
     return ShopOffersOut(items=items, total=len(rows), page=page, has_more=start + PAGE_SIZE < len(rows))
 
 
-def mall_detail(mall_id: int, at: datetime) -> MallDetail | None:
+def mall_detail(mall_id: int, at: datetime, lat: float | None = None, lng: float | None = None) -> MallDetail | None:
     con = catalog()
     m = con.execute("SELECT * FROM malls WHERE mall_id=?", (mall_id,)).fetchone()
     if not m:
@@ -68,7 +100,15 @@ def mall_detail(mall_id: int, at: datetime) -> MallDetail | None:
         shops.sort(key=lambda s: (s.unit is None, _unit_key(s.unit), s.name))
         out_floors.append(MallFloor(floor_label=label, floor_order=order, shops=shops))
     return MallDetail(id=m["mall_id"], name=m["name"], address=m["address"], area=m["area"], lat=m["lat"],
-                      lng=m["lng"], shop_count=m["shop_count"], open_count=open_count, floors=out_floors)
+                      lng=m["lng"], shop_count=m["shop_count"], open_count=open_count, floors=out_floors,
+                      **_trip(lat, lng, m["lat"], m["lng"]))
+
+
+def _trip(lat, lng, to_lat, to_lng) -> dict:
+    """Straight-line distance and walking ETA from the user, when we know where they are."""
+    if lat is None or lng is None:
+        return {}
+    return {"distance_m": haversine_m(lat, lng, to_lat, to_lng), "eta_min": eta_min(route_km(lat, lng, to_lat, to_lng), "walk")}
 
 
 def _unit_key(unit: str | None):

@@ -11,6 +11,9 @@
   --color-flesh: #F7F8F6;
   --color-card: #FFFFFF;
   --color-placeholder: #EEF1EE;
+  --color-mist: #EEF1EE;
+  --color-leader: #C9D0CA;
+  --color-faded: #6E746D;
 
   --color-radish: #C8385A;
   --color-radish-hover: #B53050;
@@ -25,8 +28,10 @@
   --color-leaf-tint: #EEF5E8;
   --color-wilt: #6F6C3A;
   --color-wilt-tint: #F2F1E3;
-  --color-stale-ink: #7A8079;
+  --color-stale-ink: #6E746D;
   --color-stamp: #007A36;
+  --color-stamp-ink: #00A63E;
+  --color-stamp-row: #F7FBF8;
   --color-stamp-tint: #EAF5EC;
   --color-stamp-wash: #F7FBF8;
   --color-stamp-leader: #A9D3B6;
@@ -54,7 +59,9 @@
   --shadow-float: 0 1px 2px rgba(27, 36, 32, .06), 0 10px 28px -14px rgba(27, 36, 32, .24);
   --shadow-hair: 0 1px 2px rgba(27, 36, 32, .10);
 
-  --animate-stamp: stamp-land 220ms ease-out both;
+  --animate-stamp: stamp-land 220ms cubic-bezier(.2,.8,.2,1) both;
+  --animate-ink-ring: ink-ring 600ms ease-out 200ms both;
+  --animate-blink-step: lens-step 1.2s steps(1) infinite;
   --animate-blink: lens-blink 1.2s ease-in-out infinite;
   --animate-sheet: sheet-up 220ms ease-out both;
 }
@@ -62,6 +69,14 @@
 @keyframes stamp-land {
   from { transform: scale(1.4) rotate(-14deg); opacity: 0; }
   to { transform: scale(1) rotate(-6deg); opacity: 1; }
+}
+@keyframes ink-ring {
+  from { transform: scale(.9); opacity: .5; }
+  to { transform: scale(1.35); opacity: 0; }
+}
+@keyframes lens-step {
+  0% { stroke: var(--color-radish); }
+  50% { stroke: var(--color-line); }
 }
 @keyframes lens-blink {
   0%, 100% { opacity: 1; }
@@ -84,6 +99,9 @@
   /* Persian numbers in prices line up in columns. */
   .tabular { font-variant-numeric: tabular-nums; }
   .pixelated { image-rendering: pixelated; }
+  /* 44px touch target around a smaller visual (Handoff audit): transparent ::after, size unchanged. */
+  .hit { position: relative; }
+  .hit::after { content: ""; position: absolute; inset-inline: 0; top: min(0px, calc((100% - 44px) / 2)); bottom: min(0px, calc((100% - 44px) / 2)); }
   .no-scrollbar { scrollbar-width: none; }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   :focus-visible { outline: 2px solid var(--color-radish); outline-offset: 2px; }

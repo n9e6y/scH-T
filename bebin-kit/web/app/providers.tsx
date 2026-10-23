@@ -1,8 +1,15 @@
 "use client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState, useSyncExternalStore } from "react";
-import { Lockup, Mascot, TorobWordmark } from "@/components/brand";
-import { ToastHost } from "@/components/chrome";
+import { useRouter } from "next/navigation";
+import { useCallback, useState, useSyncExternalStore } from "react";
+import { Lockup, Mascot, MiniStamp, TorobWordmark } from "@/components/brand";
+import { ToastHost, useToasts } from "@/components/chrome";
+import { ComposerHost } from "@/components/composer";
+import { InstallSheet, NetBanner, useInstall, useServiceWorker } from "@/components/system";
+import { Hourglass } from "@/components/icons";
+import type { InquiryOut } from "@/lib/api";
+import { timeFa } from "@/lib/format";
+import { useLiveEvents } from "@/lib/live";
 import { useApp } from "@/lib/store";
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -10,10 +17,34 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const hydrated = useHydrated();
   return (
     <QueryClientProvider client={client}>
-      {hydrated ? children : <Splash />}
+      {hydrated ? <>{children}<Live /><ComposerHost /><NetBanner /><InstallSheet /></> : <Splash />}
       <ToastHost />
     </QueryClientProvider>
   );
+}
+
+/** Reply toast (Inquiry 19): the stamp sits on a white disc so stamp green never lands on soil. */
+function Live() {
+  const push = useToasts((s) => s.push);
+  const router = useRouter();
+  useServiceWorker();
+  const onReply = useCallback((inq: InquiryOut, type: string) => {
+    const answered = type === "answered";
+    if (answered) setTimeout(() => useInstall.getState().set({ want: true }), 3000);
+    const out = inq.outcome === "out_of_stock";
+    push({
+      text: answered ? `${inq.shop.name} ${out ? "گفت ناموجود است" : "جواب داد"}` : `${inq.shop.name} جواب نداد`,
+      sub: answered ? `${inq.preview}${inq.answered_at ? `، ${timeFa(inq.answered_at)}` : ""}` : inq.preview,
+      icon: (
+        <span className="flex size-10 flex-none items-center justify-center rounded-full bg-card">
+          {answered && !out ? <MiniStamp size={28} /> : <Hourglass size={18} color="var(--color-wilt)" />}
+        </span>
+      ),
+      action: { label: "ببین", onClick: () => router.push(`/inquiries/${inq.id}`) },
+    });
+  }, [push, router]);
+  useLiveEvents(onReply);
+  return null;
 }
 
 /** Persisted state (location, onboarding) lives in localStorage; show the splash until it's loaded. */

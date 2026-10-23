@@ -51,3 +51,20 @@ export function relTime(iso: string, now: Date = new Date()): string {
   if (diff < 24 * 60) return `${faDigits(Math.floor(diff / 60))} ساعت پیش`;
   return jalaliDate(iso) ?? "";
 }
+
+/** For chips and reasons: 3700000 → «۳٫۷ میلیون» (same as api/app/fa.py price_short). */
+export function priceShort(toman: number): string {
+  if (toman >= 1_000_000) return `${faDigits((toman / 1_000_000).toFixed(1).replace(/\.0$/, "")).replace(".", "٫")} میلیون`;
+  if (toman >= 1000) return `${faDigits(Math.floor(toman / 1000))} هزار`;
+  return faDigits(toman);
+}
+
+/** Persian, Arabic and Latin digits in, a number out («۴٬۰۰۰٬۰۰۰» → 4000000). Empty → null. */
+export function parseDigits(s: string): number | null {
+  const latin = s.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)));
+  const digits = latin.replace(/\D/g, "");
+  return digits ? Number(digits) : null;
+}
+
+/** Persian digits for Persian text; text with Latin letters (model names like «Mali-G57») keeps its digits. */
+export const faText = (s: string): string => (/[A-Za-z]/.test(s) ? s : faDigits(s));

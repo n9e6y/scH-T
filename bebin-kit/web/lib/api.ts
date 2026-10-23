@@ -51,3 +51,23 @@ export async function api<T>(path: string, params?: Query, init?: RequestInit): 
   }
   return res.json() as Promise<T>;
 }
+export type Chip = S["Chip"];
+export type Applied = S["Applied"];
+export type RelaxOption = S["RelaxOption"];
+export type NeedQuestion = S["NeedQuestion"];
+export type NeedOption = S["NeedOption"];
+export type Facet = S["Facet"];
+export type SellersOut = S["SellersOut"];
+export type CompareOut = S["CompareOut"];
+export type ShopDetail = S["ShopDetail"];
+export type MallDetail = S["MallDetail"];
+export type InquiryOut = S["InquiryOut"];
+export type InquiriesOut = S["InquiriesOut"];
+export type ComposeOut = S["ComposeOut"];
+export type AlternativesOut = S["AlternativesOut"];
+export type SellerInboxOut = S["SellerInboxOut"];
+export type SellerShop = S["SellerShop"];
+export type DemoState = S["DemoState"];
+export const API_BASE = BASE;
+export type PlanOut = S["PlanOut"];
+export type PlanStopOut = S["PlanStopOut"];

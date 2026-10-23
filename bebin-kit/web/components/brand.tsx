@@ -6,9 +6,9 @@ export function Glasses({ width = 30, color = "var(--color-radish)", blink = fal
   { width?: number; color?: string; blink?: boolean; className?: string }) {
   return (
     <svg width={width} height={(width * 64) / 124} viewBox="0 0 124 64" aria-hidden className={`flex-none ${className}`}>
-      <circle cx="28" cy="34" r="21" fill="none" stroke={color} strokeWidth="14" className={blink ? "animate-blink" : ""} />
+      <circle cx="28" cy="34" r="21" fill="none" stroke={color} strokeWidth="14" className={blink ? "animate-blink-step [animation-delay:-.6s]" : ""} />
       <circle cx="96" cy="34" r="21" fill="none" stroke={color} strokeWidth="14"
-        className={blink ? "animate-blink [animation-delay:.6s]" : ""} />
+        className={blink ? "animate-blink-step" : ""} />
       <path d="M55 26 Q62 19 69 26" fill="none" stroke={color} strokeWidth="8" strokeLinecap="round" />
     </svg>
   );
@@ -47,12 +47,13 @@ export function Mascot({ pose = "default", scale = 4, className = "" }: { pose?:
   );
 }
 
-/** Small double-ring stamp with the pixel radish (40 or 24 px). Only for seller-verified facts. */
-export function MiniStamp({ size = 40, className = "" }: { size?: 40 | 26 | 24; className?: string }) {
+/** Small double-ring stamp with the pixel radish. Rests at −6°; rings and radish in stamp-ink.
+ *  40 = tile (mini 18), 28/24/20 = chip (mini 9). Only for seller-verified facts. */
+export function MiniStamp({ size = 40, className = "" }: { size?: 40 | 28 | 26 | 24 | 20; className?: string }) {
   if (size === 40) {
     return (
-      <span className={`flex size-10 flex-none -rotate-[10deg] items-center justify-center rounded-full border-2 border-stamp ${className}`}>
-        <span className="flex size-[30px] items-center justify-center rounded-full border border-stamp">
+      <span className={`flex size-10 flex-none -rotate-6 items-center justify-center rounded-full border-2 border-stamp-ink ${className}`}>
+        <span className="flex size-[30px] items-center justify-center rounded-full border border-stamp-ink">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={miniRadish} width={18} height={18} alt="" className="pixelated" />
         </span>
@@ -60,7 +61,7 @@ export function MiniStamp({ size = 40, className = "" }: { size?: 40 | 26 | 24; 
     );
   }
   return (
-    <span className={`flex flex-none -rotate-[10deg] items-center justify-center rounded-full border-[1.5px] border-stamp ${className}`}
+    <span className={`flex flex-none -rotate-6 items-center justify-center rounded-full border-[1.5px] border-stamp-ink ${className}`}
       style={{ width: size, height: size }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={miniRadish} width={9} height={9} alt="" className="pixelated" />

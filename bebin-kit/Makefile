@@ -48,5 +48,5 @@ bench:
 smoke:
 	scripts/smoke.sh $(API_URL) $(WEB_URL)
 
-eval:
-	@echo "M5: api/tests/eval/ not built yet"
+eval:  # opt-in; add LIVE=1 to also run the assistant scenarios against the real LLM
+	$(UV) run python eval/run_eval.py $(if $(LIVE),--live,)

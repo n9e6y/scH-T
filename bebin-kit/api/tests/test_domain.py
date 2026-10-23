@@ -33,3 +33,10 @@ def test_fa_formatting():
     assert fa.minutes(75) == "۱ ساعت و ۱۵ دقیقه"
     assert fa.price_short(3_700_000) == "۳٫۷ میلیون"
     assert fa.price_short(4_000_000) == "۴ میلیون"
+
+
+def test_jalali_dates():
+    from app.fa import jalali, to_jalali
+    assert to_jalali(2026, 10, 19) == (1405, 7, 27)
+    assert to_jalali(2025, 3, 21) == (1404, 1, 1)
+    assert jalali("2026-10-12T21:21:18+00:00") == "۲۱ مهر"  # 00:51 on 13 Oct in Tehran

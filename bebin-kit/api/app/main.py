@@ -1,12 +1,28 @@
+import asyncio
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.config import get_settings
-from app.routers import catalog, meta
+from app.inquiries import engine
+from app.routers import assistant, catalog, inquiries, meta
 
-app = FastAPI(title="Bebin API", version="0.1.0", docs_url="/api/docs", openapi_url="/api/openapi.json")
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    """Start the inquiry scheduler and re-queue whatever was pending before a restart."""
+    engine.hub.loop = asyncio.get_running_loop()
+    engine.rehydrate()
+    task = asyncio.create_task(engine.scheduler.run())
+    yield
+    task.cancel()
+
+
+app = FastAPI(title="Bebin API", version="0.1.0", docs_url="/api/docs", openapi_url="/api/openapi.json",
+              lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -34,3 +50,5 @@ async def unhandled(_: Request, exc: Exception):
 
 app.include_router(meta.router, prefix="/api")
 app.include_router(catalog.router, prefix="/api")
+app.include_router(inquiries.router, prefix="/api")
+app.include_router(assistant.router, prefix="/api")

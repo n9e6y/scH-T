@@ -113,7 +113,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Search */
+        /**
+         * Search
+         * @description `radius=0` means any distance, even when the query names an area.
+         */
         get: operations["search_api_search_get"];
         put?: never;
         post?: never;
@@ -259,10 +262,441 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/inquiries/compose": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Compose */
+        get: operations["compose_api_inquiries_compose_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/inquiries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Inquiries */
+        get: operations["list_inquiries_api_inquiries_get"];
+        put?: never;
+        /** Create */
+        post: operations["create_api_inquiries_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/inquiries/{inquiry_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Inquiry */
+        get: operations["get_inquiry_api_inquiries__inquiry_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/inquiries/{inquiry_id}/{action}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Inquiry Action */
+        post: operations["inquiry_action_api_inquiries__inquiry_id___action__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alternatives": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Alternatives */
+        get: operations["alternatives_api_alternatives_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Events */
+        get: operations["events_api_events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/seller/shops": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Seller Shops */
+        get: operations["seller_shops_api_seller_shops_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/seller/inbox": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Seller Inbox */
+        get: operations["seller_inbox_api_seller_inbox_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/seller/presence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Seller Presence */
+        post: operations["seller_presence_api_seller_presence_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/seller/inquiries/{inquiry_id}/reply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Seller Reply */
+        post: operations["seller_reply_api_seller_inquiries__inquiry_id__reply_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/seller/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Seller Events */
+        get: operations["seller_events_api_seller_events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Visit Plan */
+        post: operations["visit_plan_api_plan_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/demo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Demo State */
+        get: operations["demo_state_api_demo_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/demo/override": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Demo Override */
+        post: operations["demo_override_api_demo_override_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/demo/speed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Demo Speed */
+        post: operations["demo_speed_api_demo_speed_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assistant/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Chat */
+        post: operations["chat_api_assistant_chat_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assistant/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Status */
+        get: operations["status_api_assistant_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assistant/_schema": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Schema
+         * @description Documents the block types streamed by /assistant/chat (for `make types`).
+         */
+        get: operations["schema_api_assistant__schema_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AltItem */
+        AltItem: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "shop" | "product";
+            /** Shop Id */
+            shop_id?: string | null;
+            /** Shop Name */
+            shop_name?: string | null;
+            /** Product Id */
+            product_id?: string | null;
+            /** Title */
+            title: string;
+            /** Model */
+            model?: string | null;
+            /** Reason */
+            reason: string;
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "route" | "ask" | "view";
+            /** Action Label */
+            action_label: string;
+            /**
+             * Primary
+             * @default false
+             */
+            primary: boolean;
+            /** Lat */
+            lat?: number | null;
+            /** Lng */
+            lng?: number | null;
+        };
+        /** AltTier */
+        AltTier: {
+            /**
+             * Key
+             * @enum {string}
+             */
+            key: "same_product" | "same_shop" | "similar_nearby" | "related";
+            /** Title */
+            title: string;
+            /** Items */
+            items: components["schemas"]["AltItem"][];
+        };
+        /** AlternativesOut */
+        AlternativesOut: {
+            /** Tiers */
+            tiers: components["schemas"]["AltTier"][];
+            /** Note */
+            note?: string | null;
+        };
+        /** AnswerField */
+        AnswerField: {
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+            /**
+             * Value
+             * @description None = the seller skipped this question
+             */
+            value?: string | null;
+            /** Sub */
+            sub?: string | null;
+        };
+        /**
+         * Applied
+         * @description The filters actually in effect: URL params merged with what was understood from the query text.
+         */
+        Applied: {
+            /** Cat */
+            cat?: string | null;
+            /** Min */
+            min?: number | null;
+            /** Max */
+            max?: number | null;
+            /** Pay */
+            pay?: string[];
+            /**
+             * Fast
+             * @default false
+             */
+            fast: boolean;
+            /**
+             * Open
+             * @default false
+             */
+            open: boolean;
+            /**
+             * Radius
+             * @description km; None = any distance
+             */
+            radius?: number | null;
+            /** Brand */
+            brand?: string[];
+            /**
+             * Area
+             * @description Area preset named in the query; it becomes the distance origin
+             */
+            area?: string | null;
+            /**
+             * Unknown
+             * @description Sellers whose status is unknown for an active filter are included
+             * @default false
+             */
+            unknown: boolean;
+            /**
+             * Sort
+             * @default relevance
+             */
+            sort: string;
+            /**
+             * Boost
+             * @description Need-finder ranking boost keywords
+             */
+            boost?: string[];
+        };
         /** Area */
         Area: {
             /** Id */
@@ -275,6 +709,15 @@ export interface components {
             lng: number;
             /** Shop Count */
             shop_count: number;
+        };
+        /**
+         * AssistantSchema
+         * @description Not an endpoint payload: exposes the SSE block types to `make types`.
+         */
+        AssistantSchema: {
+            /** Block */
+            block: components["schemas"]["ProductListBlock"] | components["schemas"]["SellerListBlock"] | components["schemas"]["QuestionBlock"] | components["schemas"]["InquiryConfirmBlock"] | components["schemas"]["CompareBlock"] | components["schemas"]["ShopCardBlock"] | components["schemas"]["PlanConfirmBlock"] | components["schemas"]["NoticeBlock"];
+            chat_in: components["schemas"]["ChatIn"];
         };
         /** CategoryGroup */
         CategoryGroup: {
@@ -294,6 +737,41 @@ export interface components {
             /** Text Fa */
             text_fa: string;
         };
+        /** ChatContext */
+        ChatContext: {
+            /** Location Name */
+            location_name?: string | null;
+            /** Lat */
+            lat?: number | null;
+            /** Lng */
+            lng?: number | null;
+            /** Compare Ids */
+            compare_ids?: string[];
+            /** Plan Shop Ids */
+            plan_shop_ids?: string[];
+        };
+        /** ChatIn */
+        ChatIn: {
+            /** Messages */
+            messages: components["schemas"]["ChatMessage"][];
+            /**
+             * @default {
+             *       "compare_ids": [],
+             *       "plan_shop_ids": []
+             *     }
+             */
+            context: components["schemas"]["ChatContext"];
+        };
+        /** ChatMessage */
+        ChatMessage: {
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "user" | "assistant";
+            /** Content */
+            content: string;
+        };
         /** Chip */
         Chip: {
             /** Key */
@@ -302,6 +780,27 @@ export interface components {
             label: string;
             /** Value */
             value?: string | number | null;
+            /**
+             * Id
+             * @description Pass back as `ign` to drop this understood filter («pay:installments», «max»)
+             * @default
+             */
+            id: string;
+        };
+        /** CompareBlock */
+        CompareBlock: {
+            /**
+             * Type
+             * @default compare
+             * @constant
+             */
+            type: "compare";
+            /** Ids */
+            ids: string[];
+            /** Columns */
+            columns: components["schemas"]["InquiryProduct"][];
+            /** Rows */
+            rows: components["schemas"]["CompareRow"][];
         };
         /** CompareColumn */
         CompareColumn: {
@@ -343,8 +842,19 @@ export interface components {
         CompareOut: {
             /** Columns */
             columns: components["schemas"]["CompareColumn"][];
+            /**
+             * Summary
+             * @description Listing facts: price, sellers, nearest, installments, last change
+             */
+            summary?: components["schemas"]["CompareRow"][];
             /** Specs */
             specs: components["schemas"]["CompareRow"][];
+            /**
+             * Verdict Source
+             * @default rules
+             * @enum {string}
+             */
+            verdict_source: "llm" | "rules";
         };
         /** CompareRow */
         CompareRow: {
@@ -354,6 +864,16 @@ export interface components {
             values: (string | null)[];
             /** Differs */
             differs: boolean;
+            /**
+             * Leader
+             * @description Column index that leads this row (soil dot), if any
+             */
+            leader?: number | null;
+            /**
+             * Ltr
+             * @default false
+             */
+            ltr: boolean;
         };
         /** Components */
         Components: {
@@ -367,6 +887,69 @@ export interface components {
             fresh: number;
             /** Verified */
             verified: number;
+        };
+        /** ComposeOut */
+        ComposeOut: {
+            /** Title */
+            title: string;
+            /** Recipients */
+            recipients: components["schemas"]["ComposeRecipient"][];
+            product: components["schemas"]["InquiryProduct"] | null;
+            /** Questions */
+            questions: components["schemas"]["ComposeQuestion"][];
+            /** Hold Options */
+            hold_options: string[];
+            /** Eta Note */
+            eta_note: string;
+            /** Closed Note */
+            closed_note?: string | null;
+            /**
+             * Open Alternatives
+             * @description Open listed sellers to ask instead
+             */
+            open_alternatives?: components["schemas"]["ComposeRecipient"][];
+        };
+        /** ComposeQuestion */
+        ComposeQuestion: {
+            /**
+             * Key
+             * @enum {string}
+             */
+            key: "price" | "stock" | "hours" | "location" | "installments" | "hold" | "has_model";
+            /** Label */
+            label: string;
+            /** Hint */
+            hint: string;
+            /** Checked */
+            checked: boolean;
+            /** Field */
+            field?: ("detail" | "hold") | null;
+        };
+        /** ComposeRecipient */
+        ComposeRecipient: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            open_now: components["schemas"]["OpenStatus"];
+        };
+        /** DemoOverrideIn */
+        DemoOverrideIn: {
+            /** Shop Id */
+            shop_id: string;
+            /** Outcome */
+            outcome: ("answer" | "out_of_stock" | "no_answer" | "price_up") | null;
+        };
+        /** DemoState */
+        DemoState: {
+            /** Enabled */
+            enabled: boolean;
+            /** Speed */
+            speed: number;
+            /** Overrides */
+            overrides: {
+                [key: string]: string;
+            };
         };
         /** Facet */
         Facet: {
@@ -395,6 +978,171 @@ export interface components {
             ranges: string[] | null;
             /** Is Today */
             is_today: boolean;
+        };
+        /** InquiriesOut */
+        InquiriesOut: {
+            /** Groups */
+            groups: components["schemas"]["InquiryGroup"][];
+            /** Unread */
+            unread: number;
+            /**
+             * Counts
+             * @description all | waiting | answered | no_answer
+             */
+            counts: {
+                [key: string]: number;
+            };
+        };
+        /** InquiryConfirmBlock */
+        InquiryConfirmBlock: {
+            /**
+             * Type
+             * @default inquiry_confirm
+             * @constant
+             */
+            type: "inquiry_confirm";
+            product: components["schemas"]["InquiryProduct"] | null;
+            /** Shops */
+            shops: components["schemas"]["ShopMini"][];
+            /** Questions */
+            questions: ("price" | "stock" | "hours" | "location" | "installments" | "hold" | "has_model")[];
+            /** Summary */
+            summary: string;
+            /** Detail */
+            detail?: string | null;
+        };
+        /** InquiryGroup */
+        InquiryGroup: {
+            product: components["schemas"]["InquiryProduct"] | null;
+            /** Items */
+            items: components["schemas"]["InquiryOut"][];
+        };
+        /** InquiryIn */
+        InquiryIn: {
+            /** Shop Ids */
+            shop_ids: string[];
+            /** Product Id */
+            product_id?: string | null;
+            /** Questions */
+            questions: ("price" | "stock" | "hours" | "location" | "installments" | "hold" | "has_model")[];
+            /**
+             * Detail
+             * @description Size/colour for the stock question
+             */
+            detail?: string | null;
+            /** Hold Until */
+            hold_until?: string | null;
+            /** Note */
+            note?: string | null;
+            /** Lat */
+            lat?: number | null;
+            /** Lng */
+            lng?: number | null;
+        };
+        /** InquiryOut */
+        InquiryOut: {
+            /** Id */
+            id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "sent" | "delivered" | "seen" | "answered" | "no_answer" | "cancelled";
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "waiting" | "answered" | "out_of_stock" | "no_answer" | "cancelled";
+            shop: components["schemas"]["ShopRef"];
+            product: components["schemas"]["InquiryProduct"] | null;
+            /**
+             * Tier
+             * @enum {string}
+             */
+            tier: "listed" | "related";
+            /** Questions */
+            questions: string[];
+            /**
+             * Ask Text
+             * @description The questions as the shopper sent them
+             */
+            ask_text: string;
+            /** Detail */
+            detail: string | null;
+            /** Hold Until */
+            hold_until: string | null;
+            /** Note */
+            note: string | null;
+            /**
+             * Channel
+             * @enum {string}
+             */
+            channel: "simulated" | "panel";
+            /** Simulated */
+            simulated: boolean;
+            /** Created At */
+            created_at: string;
+            /** Updated At */
+            updated_at: string;
+            /** Answered At */
+            answered_at: string | null;
+            /** Unread */
+            unread: boolean;
+            /** Steps */
+            steps: components["schemas"]["InquiryStep"][];
+            /** Answers */
+            answers: components["schemas"]["AnswerField"][];
+            /** Message */
+            message: string | null;
+            /** Preview */
+            preview: string;
+            /** Failure Note */
+            failure_note: string | null;
+            /**
+             * Listed Note
+             * @description What the listing said, shown under an answer
+             */
+            listed_note?: string | null;
+            /** Can Nudge */
+            can_nudge: boolean;
+            /** Can Cancel */
+            can_cancel: boolean;
+            open_now: components["schemas"]["OpenStatus"];
+            /**
+             * Buyer
+             * @description How the seller panel names the shopper
+             */
+            buyer: string;
+            /** Buyer Distance M */
+            buyer_distance_m?: number | null;
+        };
+        /** InquiryProduct */
+        InquiryProduct: {
+            /** Id */
+            id: string;
+            /** Title */
+            title: string;
+            /** Model */
+            model: string | null;
+            /** Image */
+            image: string | null;
+        };
+        /** InquiryStep */
+        InquiryStep: {
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "done" | "answered" | "failed" | "out" | "waiting" | "pending";
+            /**
+             * At
+             * @description HH:MM, Persian digits
+             */
+            at?: string | null;
         };
         /** Location */
         Location: {
@@ -429,6 +1177,10 @@ export interface components {
             shop_count: number;
             /** Open Count */
             open_count: number;
+            /** Distance M */
+            distance_m?: number | null;
+            /** Eta Min */
+            eta_min?: number | null;
             /** Floors */
             floors: components["schemas"]["MallFloor"][];
         };
@@ -498,6 +1250,55 @@ export interface components {
             /** Now */
             now: string;
         };
+        /** NeedOption */
+        NeedOption: {
+            /** Label */
+            label: string;
+            /** Min */
+            min?: number | null;
+            /** Max */
+            max?: number | null;
+            /** Brand */
+            brand?: string | null;
+            /**
+             * Boost
+             * @description Ranking boost keywords (use question)
+             */
+            boost?: string[] | null;
+        };
+        /** NeedQuestion */
+        NeedQuestion: {
+            /**
+             * Key
+             * @enum {string}
+             */
+            key: "use" | "brand" | "budget";
+            /**
+             * Label
+             * @description Collapsed-row label, e.g. «برند»
+             */
+            label: string;
+            /** Question */
+            question: string;
+            /** Options */
+            options: components["schemas"]["NeedOption"][];
+        };
+        /** NoticeBlock */
+        NoticeBlock: {
+            /**
+             * Type
+             * @default notice
+             * @constant
+             */
+            type: "notice";
+            /**
+             * Level
+             * @enum {string}
+             */
+            level: "info" | "wilt";
+            /** Text */
+            text: string;
+        };
         /** OpenStatus */
         OpenStatus: {
             /**
@@ -544,6 +1345,153 @@ export interface components {
              * @default []
              */
             installment_types: string[];
+        };
+        /** PlanAlt */
+        PlanAlt: {
+            /** Shop Id */
+            shop_id: string;
+            /** Name */
+            name: string;
+            /** Reason */
+            reason: string;
+            /** Product Id */
+            product_id?: string | null;
+        };
+        /** PlanConfirmBlock */
+        PlanConfirmBlock: {
+            /**
+             * Type
+             * @default plan_confirm
+             * @constant
+             */
+            type: "plan_confirm";
+            /** Shops */
+            shops: components["schemas"]["ShopMini"][];
+            product?: components["schemas"]["InquiryProduct"] | null;
+            /** Summary */
+            summary: string;
+        };
+        /** PlanIn */
+        PlanIn: {
+            /** Stops */
+            stops: components["schemas"]["PlanStopIn"][];
+            /** Lat */
+            lat?: number | null;
+            /** Lng */
+            lng?: number | null;
+            /** Start Label */
+            start_label?: string | null;
+            /**
+             * Start At
+             * @description ISO time; default = now (demo clock honoured)
+             */
+            start_at?: string | null;
+            /**
+             * Mode
+             * @default walk
+             * @enum {string}
+             */
+            mode: "walk" | "car";
+            /**
+             * Optimize
+             * @description False keeps the given order (after a manual drag)
+             * @default true
+             */
+            optimize: boolean;
+        };
+        /** PlanOut */
+        PlanOut: {
+            /** Start Text */
+            start_text: string;
+            /** Stops */
+            stops: components["schemas"]["PlanStopOut"][];
+            /** End Text */
+            end_text: string;
+            /** End Short */
+            end_short: string;
+            /** Meta */
+            meta: string;
+            /** Warnings */
+            warnings: number;
+            /** Banner */
+            banner?: string | null;
+            /**
+             * Banner Start At
+             * @description Start time that makes every stop open
+             */
+            banner_start_at?: string | null;
+            /** Banner Start Label */
+            banner_start_label?: string | null;
+            /** Footer Title */
+            footer_title: string;
+            /** Footer Sub */
+            footer_sub: string;
+            /** Nav Url */
+            nav_url: string | null;
+            /** Demo Clock */
+            demo_clock: boolean;
+        };
+        /** PlanStopIn */
+        PlanStopIn: {
+            /** Shop Id */
+            shop_id: string;
+            /** Product Id */
+            product_id?: string | null;
+        };
+        /** PlanStopOut */
+        PlanStopOut: {
+            /**
+             * Key
+             * @description Stable id of the stop: mall:<id> or the shop id
+             */
+            key: string;
+            /** Shop Ids */
+            shop_ids: string[];
+            /** Title */
+            title: string;
+            /** Place */
+            place: string;
+            /** Lat */
+            lat: number;
+            /** Lng */
+            lng: number;
+            /** Leg */
+            leg: string;
+            /** Arrive */
+            arrive: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "open" | "closing" | "closed_on_arrival" | "closed_now" | "unknown";
+            /** Status Text */
+            status_text: string;
+            /** Subs */
+            subs: components["schemas"]["PlanSub"][];
+            alternative?: components["schemas"]["PlanAlt"] | null;
+            /** Can Ask */
+            can_ask: boolean;
+        };
+        /** PlanSub */
+        PlanSub: {
+            /** Shop Id */
+            shop_id: string;
+            /** Name */
+            name: string;
+            /** Unit */
+            unit: string | null;
+            /** Item */
+            item: string | null;
+            /**
+             * Verified
+             * @description Today's verification text (stamp)
+             */
+            verified?: string | null;
+            /**
+             * Verified Old
+             * @description An older verification, greyed «قدیمی شده»
+             */
+            verified_old?: string | null;
         };
         /** Price */
         Price: {
@@ -611,6 +1559,11 @@ export interface components {
              */
             freshest: "fresh" | "aging" | "stale" | "unknown";
             /**
+             * Price Changed At
+             * @description Last price change of the freshest passing seller
+             */
+            price_changed_at?: string | null;
+            /**
              * @default {
              *       "state": "unknown"
              *     }
@@ -656,6 +1609,48 @@ export interface components {
             /** Trust Summary */
             trust_summary: string;
         };
+        /** ProductListBlock */
+        ProductListBlock: {
+            /**
+             * Type
+             * @default product_list
+             * @constant
+             */
+            type: "product_list";
+            /** Title */
+            title: string;
+            /** Items */
+            items: components["schemas"]["ProductCard"][];
+            /**
+             * Query
+             * @description Opens the full results in search
+             */
+            query?: string | null;
+            /**
+             * Total
+             * @default 0
+             */
+            total: number;
+            /**
+             * Plain
+             * @description No AI reasons (fallback search)
+             * @default false
+             */
+            plain: boolean;
+        };
+        /** QuestionBlock */
+        QuestionBlock: {
+            /**
+             * Type
+             * @default question_chips
+             * @constant
+             */
+            type: "question_chips";
+            /** Question */
+            question: string;
+            /** Options */
+            options: string[];
+        };
         /** RelatedRow */
         RelatedRow: {
             /**
@@ -676,6 +1671,34 @@ export interface components {
             /** Note */
             note: string;
         };
+        /** RelaxOption */
+        RelaxOption: {
+            /**
+             * Key
+             * @description Filter to drop: pay | max | min | open | fast | radius | brand
+             */
+            key: string;
+            /**
+             * Value
+             * @description For pay: which method
+             */
+            value?: string | null;
+            /**
+             * Label
+             * @description Row label, e.g. «بدون اقساطی»
+             */
+            label: string;
+            /**
+             * Action
+             * @description Button label, e.g. «بدون فیلتر اقساطی ببین»
+             */
+            action: string;
+            /**
+             * Count
+             * @description Products found if only this filter is dropped
+             */
+            count: number;
+        };
         /** SearchOut */
         SearchOut: {
             /** Query */
@@ -692,8 +1715,30 @@ export interface components {
             page: number;
             /** Has More */
             has_more: boolean;
-            /** Excluded Unknown */
+            /**
+             * @default {
+             *       "pay": [],
+             *       "fast": false,
+             *       "open": false,
+             *       "brand": [],
+             *       "unknown": false,
+             *       "sort": "relevance",
+             *       "boost": []
+             *     }
+             */
+            applied: components["schemas"]["Applied"];
+            /**
+             * Excluded Unknown
+             * @description Products dropped only for unknowns
+             */
             excluded_unknown?: {
+                [key: string]: number;
+            };
+            /**
+             * Unknown Sellers
+             * @description Shops whose status is unknown for an active filter (excluded unless applied.unknown)
+             */
+            unknown_sellers?: {
                 [key: string]: number;
             };
             /** Facets */
@@ -702,10 +1747,75 @@ export interface components {
             };
             /** Price Quartiles */
             price_quartiles?: number[];
+            /** @default {} */
+            price_bounds: components["schemas"]["PriceRange"];
             /** @description The most restrictive filter to drop when results are empty */
             relax?: components["schemas"]["Chip"] | null;
-            /** Needfinder */
-            needfinder?: null;
+            /** Relax Options */
+            relax_options?: components["schemas"]["RelaxOption"][];
+            /**
+             * Relax Note
+             * @description Why nothing matched, in Persian
+             */
+            relax_note?: string | null;
+            /**
+             * Needfinder
+             * @description Open questions, at most 2, data-derived
+             */
+            needfinder?: components["schemas"]["NeedQuestion"][];
+        };
+        /** SellerInboxItem */
+        SellerInboxItem: {
+            inquiry: components["schemas"]["InquiryOut"];
+            /** Prefill Price */
+            prefill_price: number | null;
+            /** Prefill Location */
+            prefill_location: string | null;
+            /** Hour Options */
+            hour_options: string[];
+        };
+        /** SellerInboxOut */
+        SellerInboxOut: {
+            shop: components["schemas"]["SellerShop"];
+            /** New */
+            new: components["schemas"]["SellerInboxItem"][];
+            /** Answered */
+            answered: components["schemas"]["InquiryOut"][];
+        };
+        /** SellerListBlock */
+        SellerListBlock: {
+            /**
+             * Type
+             * @default seller_list
+             * @constant
+             */
+            type: "seller_list";
+            product: components["schemas"]["InquiryProduct"];
+            /** Mode Label */
+            mode_label: string;
+            /** Rows */
+            rows: components["schemas"]["SellerRow"][];
+            /** Total */
+            total: number;
+        };
+        /** SellerReplyIn */
+        SellerReplyIn: {
+            /** Stock */
+            stock?: ("in_stock" | "out_of_stock") | null;
+            /** Stock Detail */
+            stock_detail?: string | null;
+            /** Price */
+            price?: number | null;
+            /** Hours Today */
+            hours_today?: string | null;
+            /** Location */
+            location?: string | null;
+            /** Installments */
+            installments?: string | null;
+            /** Hold */
+            hold?: string | null;
+            /** Message */
+            message?: string | null;
         };
         /** SellerRow */
         SellerRow: {
@@ -743,8 +1853,32 @@ export interface components {
             /** Score */
             score: number;
             components: components["schemas"]["Components"];
+            /**
+             * Unknown Factors
+             * @description Components scored at a neutral value because the data is missing
+             */
+            unknown_factors?: string[];
+            /**
+             * Arrival Note
+             * @description Set when the status at arrival differs from now
+             */
+            arrival_note?: string | null;
             /** Rank */
             rank: number;
+        };
+        /** SellerShop */
+        SellerShop: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Place */
+            place: string;
+            /**
+             * New Count
+             * @default 0
+             */
+            new_count: number;
         };
         /** SellersOut */
         SellersOut: {
@@ -787,6 +1921,20 @@ export interface components {
             /** Related Note */
             related_note: string;
         };
+        /** ShopCardBlock */
+        ShopCardBlock: {
+            /**
+             * Type
+             * @default shop_card
+             * @constant
+             */
+            type: "shop_card";
+            shop: components["schemas"]["ShopRef"];
+            open_now: components["schemas"]["OpenStatus"];
+            payment: components["schemas"]["Payment"];
+            /** Hours Today */
+            hours_today?: string | null;
+        };
         /** ShopDetail */
         ShopDetail: {
             shop: components["schemas"]["ShopRef"];
@@ -811,13 +1959,28 @@ export interface components {
             website: string | null;
             /** Offer Count */
             offer_count: number;
+            /** Distance M */
+            distance_m?: number | null;
+            /** Eta Min */
+            eta_min?: number | null;
             /**
              * Verifications
              * @default []
              */
-            verifications: {
-                [key: string]: unknown;
-            }[];
+            verifications: components["schemas"]["ShopVerification"][];
+        };
+        /** ShopMini */
+        ShopMini: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Lat */
+            lat?: number | null;
+            /** Lng */
+            lng?: number | null;
+            /** Mall Id */
+            mall_id?: number | null;
         };
         /** ShopOffer */
         ShopOffer: {
@@ -860,6 +2023,17 @@ export interface components {
             lng: number;
             location: components["schemas"]["Location"];
         };
+        /** ShopVerification */
+        ShopVerification: {
+            /** Text */
+            text: string;
+            /** Value */
+            value?: string | null;
+            /** Verified At */
+            verified_at: string;
+            /** Today */
+            today: boolean;
+        };
         /** SimilarItem */
         SimilarItem: {
             /**
@@ -891,6 +2065,11 @@ export interface components {
              * @enum {string}
              */
             freshest: "fresh" | "aging" | "stale" | "unknown";
+            /**
+             * Price Changed At
+             * @description Last price change of the freshest passing seller
+             */
+            price_changed_at?: string | null;
             /**
              * @default {
              *       "state": "unknown"
@@ -1083,7 +2262,7 @@ export interface operations {
             query?: {
                 q?: string;
                 cat?: string | null;
-                brand?: string | null;
+                brand?: string[];
                 min?: number | null;
                 max?: number | null;
                 pay?: ("installments" | "torob_pay" | "kala_barg")[];
@@ -1094,6 +2273,11 @@ export interface operations {
                 radius?: number | null;
                 sort?: "relevance" | "cheapest" | "nearest" | "most_sellers";
                 page?: number;
+                /** @description Understood-chip ids to drop */
+                ign?: string[];
+                /** @description Include sellers whose status is unknown for an active filter */
+                unk?: boolean;
+                boost?: string[];
             };
             header?: never;
             path?: never;
@@ -1163,6 +2347,7 @@ export interface operations {
                 fast?: boolean;
                 open?: boolean;
                 radius?: number | null;
+                unk?: boolean;
             };
             header?: never;
             path: {
@@ -1262,7 +2447,10 @@ export interface operations {
     };
     shop_api_shops__shop_id__get: {
         parameters: {
-            query?: never;
+            query?: {
+                lat?: number | null;
+                lng?: number | null;
+            };
             header?: never;
             path: {
                 shop_id: string;
@@ -1360,7 +2548,10 @@ export interface operations {
     };
     mall_api_malls__mall_id__get: {
         parameters: {
-            query?: never;
+            query?: {
+                lat?: number | null;
+                lng?: number | null;
+            };
             header?: never;
             path: {
                 mall_id: number;
@@ -1385,6 +2576,600 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    compose_api_inquiries_compose_get: {
+        parameters: {
+            query: {
+                shop_ids: string[];
+                product_id?: string | null;
+                preset?: string[];
+                lat?: number | null;
+                lng?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ComposeOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_inquiries_api_inquiries_get: {
+        parameters: {
+            query?: {
+                shop?: string | null;
+            };
+            header?: {
+                "x-session-id"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InquiriesOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_api_inquiries_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-session-id"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InquiryIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InquiryOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_inquiry_api_inquiries__inquiry_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-session-id"?: string | null;
+            };
+            path: {
+                inquiry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InquiryOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    inquiry_action_api_inquiries__inquiry_id___action__post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-session-id"?: string | null;
+            };
+            path: {
+                inquiry_id: string;
+                action: "nudge" | "cancel" | "read";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InquiryOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    alternatives_api_alternatives_get: {
+        parameters: {
+            query: {
+                product_id: string;
+                failed?: string[];
+                lat?: number | null;
+                lng?: number | null;
+                pay?: ("installments" | "torob_pay" | "kala_barg")[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlternativesOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    events_api_events_get: {
+        parameters: {
+            query: {
+                session_id: string;
+                since?: number;
+            };
+            header?: {
+                "last-event-id"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    seller_shops_api_seller_shops_get: {
+        parameters: {
+            query?: {
+                q?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SellerShop"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    seller_inbox_api_seller_inbox_get: {
+        parameters: {
+            query: {
+                shop_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SellerInboxOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    seller_presence_api_seller_presence_post: {
+        parameters: {
+            query: {
+                shop_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    seller_reply_api_seller_inquiries__inquiry_id__reply_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                inquiry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SellerReplyIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InquiryOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    seller_events_api_seller_events_get: {
+        parameters: {
+            query: {
+                shop_id: string;
+                since?: number;
+            };
+            header?: {
+                "last-event-id"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    visit_plan_api_plan_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    demo_state_api_demo_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DemoState"];
+                };
+            };
+        };
+    };
+    demo_override_api_demo_override_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DemoOverrideIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DemoState"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    demo_speed_api_demo_speed_post: {
+        parameters: {
+            query: {
+                speed: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DemoState"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    chat_api_assistant_chat_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-session-id"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChatIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    status_api_assistant_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    schema_api_assistant__schema_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantSchema"];
                 };
             };
         };

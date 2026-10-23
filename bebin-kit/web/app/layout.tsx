@@ -15,6 +15,11 @@ export const metadata: Metadata = {
   title: "ببین",
   description: "دستیار خرید حضوری در تهران: قبل از رفتن، ببین.",
   applicationName: "ببین",
+  icons: {
+    icon: [{ url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" }, { url: "/icons/favicon-16.png", sizes: "16x16", type: "image/png" }],
+    apple: "/icons/apple-touch-icon-180.png",
+  },
+  appleWebApp: { capable: true, title: "ببین", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {

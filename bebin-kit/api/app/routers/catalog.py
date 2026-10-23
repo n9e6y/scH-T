@@ -14,14 +14,18 @@ PayKey = Literal["installments", "torob_pay", "kala_barg"]
 
 
 @router.get("/search", response_model=SearchOut)
-def search(request: Request, q: str = "", cat: str | None = None, brand: str | None = None,
+def search(request: Request, q: str = "", cat: str | None = None, brand: Annotated[list[str], Query()] = [],
            min: int | None = None, max: int | None = None, pay: Annotated[list[PayKey], Query()] = [],
            fast: bool = False, open: bool = False, lat: float | None = None, lng: float | None = None,
            radius: float | None = None,
            sort: Literal["relevance", "cheapest", "nearest", "most_sellers"] = "relevance",
-           page: int = Query(1, ge=1)):
-    p = search_svc.Params(q=q, cat=cat, brand=brand, min=min, max=max, pay=list(pay), fast=fast, open=open,
-                          lat=lat, lng=lng, radius=radius, sort=sort, page=page)
+           page: int = Query(1, ge=1),
+           ign: Annotated[list[str], Query(description="Understood-chip ids to drop")] = [],
+           unk: bool = Query(False, description="Include sellers whose status is unknown for an active filter"),
+           boost: Annotated[list[str], Query(max_length=4)] = []):
+    """`radius=0` means any distance, even when the query names an area."""
+    p = search_svc.Params(q=q, cat=cat, brand=list(brand), min=min, max=max, pay=list(pay), fast=fast, open=open,
+                          lat=lat, lng=lng, radius=radius, sort=sort, page=page, ign=list(ign), unknown=unk, boost=list(boost))
     return search_svc.search(p, clock.now(request))
 
 
@@ -34,8 +38,8 @@ def product(product_id: str):
 def product_sellers(request: Request, product_id: str, lat: float | None = None, lng: float | None = None,
                     mode: Literal["balanced", "cheapest", "nearest"] = "balanced",
                     travel: Literal["walk", "car"] = "walk", pay: Annotated[list[PayKey], Query()] = [],
-                    fast: bool = False, open: bool = False, radius: float | None = None):
-    out = sellers_svc.sellers(product_id, clock.now(request), lat, lng, mode, travel, list(pay), fast, open, radius)
+                    fast: bool = False, open: bool = False, radius: float | None = None, unk: bool = False):
+    out = sellers_svc.sellers(product_id, clock.now(request), lat, lng, mode, travel, list(pay), fast, open, radius, unk)
     return out or _raise(not_found("کالا"))
 
 
@@ -52,8 +56,8 @@ def compare(body: CompareIn):
 
 
 @router.get("/shops/{shop_id}", response_model=ShopDetail)
-def shop(request: Request, shop_id: str):
-    return places.shop_detail(shop_id, clock.now(request)) or _raise(not_found("فروشگاه"))
+def shop(request: Request, shop_id: str, lat: float | None = None, lng: float | None = None):
+    return places.shop_detail(shop_id, clock.now(request), lat, lng) or _raise(not_found("فروشگاه"))
 
 
 @router.get("/shops/{shop_id}/offers", response_model=ShopOffersOut)
@@ -67,8 +71,8 @@ def malls_near(request: Request, lat: float, lng: float, limit: int = Query(8, g
 
 
 @router.get("/malls/{mall_id}", response_model=MallDetail)
-def mall(request: Request, mall_id: int):
-    return places.mall_detail(mall_id, clock.now(request)) or _raise(not_found("پاساژ"))
+def mall(request: Request, mall_id: int, lat: float | None = None, lng: float | None = None):
+    return places.mall_detail(mall_id, clock.now(request), lat, lng) or _raise(not_found("پاساژ"))
 
 
 def _raise(e: Exception):

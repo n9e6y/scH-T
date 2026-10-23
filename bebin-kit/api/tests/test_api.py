@@ -110,3 +110,48 @@ def test_shop_mall_and_errors(client, demo_product):
     assert orders == sorted(orders)
     e = client.get("/api/products/nope")
     assert e.status_code == 404 and e.json()["code"] == "not_found"
+
+
+def test_search_removed_chip_and_unknown_inclusion(client):
+    q = {"q": "گوشی زیر ۸۰ میلیون اقساطی", **FERDOWSI}
+    base = client.get("/api/search", params=q, headers=CLOCK).json()
+    assert base["applied"]["pay"] == ["installments"] and base["applied"]["max"] == 80_000_000
+    chip = next(c for c in base["understood_chips"] if c["key"] == "pay")
+    assert chip["id"] == "pay:installments"
+    dropped = client.get("/api/search", params={**q, "ign": chip["id"]}, headers=CLOCK).json()
+    assert dropped["applied"]["pay"] == [] and all(c["key"] != "pay" for c in dropped["understood_chips"])
+    assert dropped["total"] >= base["total"]
+    # Unknown sellers come back only on request, labelled «اقساطی؟», never as confirmed.
+    assert base["unknown_sellers"].get("installments", 0) > 0
+    inc = client.get("/api/search", params={**q, "unk": True}, headers=CLOCK).json()
+    assert inc["applied"]["unknown"] and inc["total"] >= base["total"]
+    assert all("اقساطی؟" not in it["reasons"] for it in base["items"])
+
+
+def test_search_empty_explains_and_counts_each_relax(client):
+    r = client.get("/api/search", params={"q": "گوشی زیر ۱ هزار تومان اقساطی"}).json()
+    assert r["total"] == 0 and r["relax_options"]
+    counts = [o["count"] for o in r["relax_options"]]
+    assert counts == sorted(counts, reverse=True)
+    assert r["relax_note"] and "سخت‌گیرترین" in r["relax_note"]
+
+
+def test_search_radius_zero_means_any(client):
+    r = client.get("/api/search", params={"q": "گوشی", "radius": 0, **FERDOWSI}).json()
+    assert r["applied"]["radius"] is None
+
+
+def test_compare_summary_leaders(client):
+    ids = [it["id"] for it in client.get("/api/search", params={"q": "گوشی"}).json()["items"][:3]]
+    r = client.post("/api/compare", json={"ids": ids, **FERDOWSI}).json()
+    keys = [row["key"] for row in r["summary"]]
+    assert keys[:2] == ["قیمت ثبت‌شده (تومان)", "تعداد فروشنده"]
+    for row in r["summary"]:
+        assert len(row["values"]) == len(ids)
+        assert row["leader"] is None or 0 <= row["leader"] < len(ids)
+
+
+def test_sellers_unknown_factors_without_location(client, demo_product):
+    r = client.get(f"/api/products/{demo_product}/sellers").json()
+    assert all("distance" in row["unknown_factors"] for row in r["listed"])
+    assert all(row["arrival_note"] is None for row in r["listed"])
