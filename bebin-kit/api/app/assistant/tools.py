@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from datetime import datetime
+from urllib.parse import urlencode
 
 from app import fa, places, products, search
 from app.inquiries.views import LABELS, product_ref
@@ -18,9 +19,12 @@ MODE_LABEL = {"balanced": "متعادل", "cheapest": "ارزان‌ترین", "
 SCHEMAS = [
     {"type": "function", "function": {
         "name": "search_products",
-        "description": "Search the catalog of listed products in Tehran stores. Use Persian query text. Prices are Toman.",
+        "description": "Search the catalog of listed products in Tehran stores. Results are ranked by relevance. "
+                       "Prices are Toman.",
         "parameters": {"type": "object", "properties": {
-            "query": {"type": "string", "description": "Persian search text, e.g. «اسپیکر جی بی ال»"},
+            "query": {"type": "string", "description": "The product in the user's own Persian words, e.g. «اسپیکر جی بی ال». "
+                                                       "Keep brand spellings as the user wrote them (don't switch to Latin), "
+                                                       "and leave out places and filters (use the other fields)."},
             "max_price": {"type": "integer"}, "min_price": {"type": "integer"},
             "installments": {"type": "boolean"}, "open_now": {"type": "boolean"},
             "sort": {"type": "string", "enum": ["relevance", "cheapest", "nearest", "most_sellers"]}},
@@ -98,20 +102,34 @@ def _card_brief(c) -> dict:
             "freshest_price": c.freshest, "reasons": c.reasons}
 
 
+RESORT_POOL = 12  # «ارزان‌ترین/نزدیک‌ترین» reorder only this many relevant matches
+
+
 def search_products(ctx: Ctx, query: str, max_price: int | None = None, min_price: int | None = None,
                     installments: bool = False, open_now: bool = False, sort: str = "relevance") -> Result:
-    p = search.Params(q=query, min=min_price, max=max_price, pay=["installments"] if installments else [], open=open_now,
-                      lat=ctx.lat, lng=ctx.lng, sort=sort if sort in search.SORTS else "relevance")
+    # Always rank by relevance. A whole-set sort let the model's sort="nearest" (for «نزدیک فردوسی») put the
+    # nearest accessories first, so the 3 suggestions didn't match «همه‌ی نتیجه‌ها» on the search page.
+    pay = ["installments"] if installments else []
+    p = search.Params(q=query, min=min_price, max=max_price, pay=pay, open=open_now, lat=ctx.lat, lng=ctx.lng)
     out = search.search(p, ctx.at)
     ctx.searches += 1
-    items = out.items[:3] if ctx.searches == 1 else []
+    ranked = list(out.items)
+    key = {"cheapest": lambda c: (c.price_range.min is None, c.price_range.min or 0),
+           "nearest": lambda c: (c.nearest_distance_m is None, c.nearest_distance_m or 0),
+           "most_sellers": lambda c: -c.seller_count}.get(sort)
+    if key:
+        ranked = sorted(ranked[:RESORT_POOL], key=key) + ranked[RESORT_POOL:]
+    items = ranked[:3] if ctx.searches == 1 else []
     for c in items:
         ctx.seen_products[c.id] = c.title
     near = f" نزدیک {ctx.location_name}" if ctx.location_name else ""
+    # The «همه‌ی نتیجه‌ها» link carries the same filters, so the search page opens on what the block showed.
+    link = [("q", query)] + [(k, str(v)) for k, v in (("min", min_price), ("max", max_price)) if v is not None] \
+        + [("pay", k) for k in pay] + ([("open", "1")] if open_now else [])
     blocks = [ProductListBlock(title=f"{fa.digits(len(items))} پیشنهاد برای تو" if items else "چیزی پیدا نشد",
-                               items=items, query=query, total=out.total)] if items else []
+                               items=items, query=query, search=urlencode(link), total=out.total)] if items else []
     model = {"total": out.total, "understood": [c.label for c in out.understood_chips],
-             "items": [_card_brief(c) for c in out.items[:5]],
+             "items": [_card_brief(c) for c in ranked[:5]],
              "excluded_unknown": out.excluded_unknown, "relax": out.relax.label if out.relax else None,
              "note": "Prices are listed by stores (not verified). Stock is unknown until a seller answers."}
     if ctx.searches > 1:

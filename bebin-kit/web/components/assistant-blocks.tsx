@@ -45,7 +45,7 @@ function ProductList({ b }: { b: Extract<Block, { type: "product_list" }> }) {
         );
       })}
       {b.query && (
-        <Link href={`/search?q=${encodeURIComponent(b.query)}`} className="flex h-11 items-center justify-center text-[13px] font-semibold text-radish">
+        <Link href={`/search?${b.search ?? `q=${encodeURIComponent(b.query)}`}`} className="flex h-11 items-center justify-center text-[13px] font-semibold text-radish">
           {b.total > b.items.length ? `همه‌ی ${faNum(b.total)} نتیجه در جست‌وجو` : "در جست‌وجو ببین"}
         </Link>
       )}

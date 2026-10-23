@@ -610,6 +610,7 @@ class ProductListBlock(BaseModel):
     title: str
     items: list[ProductCard]
     query: str | None = Field(None, description="Opens the full results in search")
+    search: str | None = Field(None, description="URL query string for /search: q plus the filters the block used")
     total: int = 0
     plain: bool = Field(False, description="No AI reasons (fallback search)")
 

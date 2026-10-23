@@ -1627,6 +1627,11 @@ export interface components {
              */
             query?: string | null;
             /**
+             * Search
+             * @description URL query string for /search: q plus the filters the block used
+             */
+            search?: string | null;
+            /**
              * Total
              * @default 0
              */
