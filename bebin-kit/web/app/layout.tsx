@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { preconnect } from "react-dom";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -9,6 +10,7 @@ const lalezar = localFont({
   src: [{ path: "./fonts/Lalezar-Arabic.woff2" }, { path: "./fonts/Lalezar-Latin.woff2" }],
   variable: "--font-lalezar",
   display: "swap",
+  preload: false, // display face for a few headings; preloading its 67 KB delayed the product image (LCP)
 });
 
 export const metadata: Metadata = {
@@ -30,6 +32,10 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
+  // Data and product images load client-side; opening both connections during HTML parse takes the DNS/TLS
+  // round trips off the LCP path (Lighthouse, product page).
+  preconnect(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000", { crossOrigin: "anonymous" });
+  preconnect("https://image.torob.com");
   return (
     <html lang="fa" dir="rtl" className={`${vazirmatn.variable} ${lalezar.variable}`}>
       <body>

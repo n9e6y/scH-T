@@ -32,6 +32,7 @@ app.add_middleware(
     allow_origins=[o.strip() for o in get_settings().cors_origins.split(",") if o.strip()],
     allow_methods=["*"],
     allow_headers=["*"],
+    max_age=86400,  # X-Session-Id makes every call preflighted; cache the answer instead of re-asking per page
 )
 
 

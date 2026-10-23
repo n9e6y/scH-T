@@ -66,11 +66,11 @@ def _nearest(product_ids: list[str], lat: float | None, lng: float | None) -> di
     if lat is None or lng is None or not product_ids:
         return {}
     ph = ",".join("?" * len(product_ids))
-    out: dict[str, list[float]] = {}
-    for r in catalog().execute(f"SELECT o.product_id, s.lat, s.lng FROM offers o JOIN shops s USING(shop_id) "
-                               f"WHERE o.product_id IN ({ph})", product_ids):
-        out.setdefault(r["product_id"], []).append(haversine_m(lat, lng, r["lat"], r["lng"]))
-    return {k: (min(v), sum(1 for d in v if d <= NEARBY_KM * 1000)) for k, v in out.items()}
+    out: dict[str, dict[str, float]] = {}  # product → shop → distance (a shop can list a product twice)
+    for r in catalog().execute(f"SELECT o.product_id, s.shop_id, s.lat, s.lng FROM offers o JOIN shops s "
+                               f"USING(shop_id) WHERE o.product_id IN ({ph})", product_ids):
+        out.setdefault(r["product_id"], {})[r["shop_id"]] = haversine_m(lat, lng, r["lat"], r["lng"])
+    return {k: (min(v.values()), sum(1 for d in v.values() if d <= NEARBY_KM * 1000)) for k, v in out.items()}
 
 
 def similar(product_id: str, k: int = 10, lat: float | None = None, lng: float | None = None) -> list[SimilarItem] | None:
@@ -157,7 +157,8 @@ def compare(ids: list[str], lat: float | None, lng: float | None) -> CompareOut:
         p = prods[pid]
         rows = near_rows[pid]
         nearest = min((x for x in rows if x[0] is not None), key=lambda x: x[0], default=None)
-        nearby = sum(1 for d, _ in rows if d is not None and d <= NEARBY_KM * 1000) if lat is not None else None
+        nearby = len({r["shop_id"] for d, r in rows if d is not None and d <= NEARBY_KM * 1000}) \
+            if lat is not None else None
         cols.append(CompareColumn(
             id=pid, title=p["title_fa"], brand=p["brand"], image=first_image(p["image_urls"]),
             price_range=PriceRange(min=p["min_price"], max=p["max_price"]),
@@ -184,8 +185,9 @@ def compare(ids: list[str], lat: float | None, lng: float | None) -> CompareOut:
         present = {normalize_fa(v) for v in vals if v}
         rows.append(CompareRow(key=key, values=vals, differs=len(present) > 1 or (len(present) == 1 and None in vals),
                                ltr=all(not v or _LATIN.fullmatch(v) for v in vals)))
-    inst = {pid: (sum(1 for _, r in near_rows[pid] if r["installments"] == 1),
-                  sum(1 for _, r in near_rows[pid] if r["installments"] is None)) for pid in ids}
+    # Distinct shops, like seller_count: per-offer counts showed «۰ از ۲۴ فروشنده، ۲۷ نامشخص».
+    inst = {pid: (len({r["shop_id"] for _, r in near_rows[pid] if r["installments"] == 1}),
+                  len({r["shop_id"] for _, r in near_rows[pid] if r["installments"] is None})) for pid in ids}
     for c in cols:
         c.verdict = _verdict(c, cols, len([v for v in specs[c.id].values() if v]),
                              [len([v for v in specs[i].values() if v]) for i in ids])

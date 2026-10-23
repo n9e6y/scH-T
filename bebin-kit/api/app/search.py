@@ -4,6 +4,8 @@ from __future__ import annotations
 import json
 import math
 import re
+import threading
+from collections import OrderedDict
 from dataclasses import dataclass, field
 from datetime import datetime
 from functools import lru_cache
@@ -117,7 +119,33 @@ def _category_hits(text: str) -> list[str]:
     return sorted(hits, key=lambda n: -sizes.get(n, 0))[:3]
 
 
-def _candidates(text: str, cat: str | None) -> list[tuple[int, float]]:
+_POOLS: OrderedDict = OrderedDict()
+_POOLS_LOCK = threading.Lock()
+POOL_CACHE = 64
+
+
+def _pool(text: str, cat: str | None):
+    """(rid → relevance, products, sellers) for a query. Changing a filter, the sort or the page keeps the text,
+    so this per-text LRU skips the vector scoring and the seller load (~0.4 s on Liara) on every follow-up.
+    The key includes the loaded index, and a pool built while the provider was down is not kept."""
+    key = (text, cat, id(embeddings.index()))
+    with _POOLS_LOCK:  # sync endpoints run in a thread pool
+        if key in _POOLS:
+            _POOLS.move_to_end(key)
+            return _POOLS[key]
+    cands, complete = _candidates(text, cat)
+    rel = dict(cands)
+    pool = (rel, *_load(list(rel))) if rel else (rel, {}, {})
+    if complete:
+        with _POOLS_LOCK:
+            _POOLS[key] = pool
+            if len(_POOLS) > POOL_CACHE:
+                _POOLS.popitem(last=False)
+    return pool
+
+
+def _candidates(text: str, cat: str | None) -> tuple[list[tuple[int, float]], bool]:
+    """Candidates plus whether they're complete (False when the vector half was expected but failed)."""
     con = catalog()
     if text:
         found: dict[int, float] = {}
@@ -143,13 +171,13 @@ def _candidates(text: str, cat: str | None) -> list[tuple[int, float]]:
         vec = embeddings.search(text, CANDIDATES)
         if vec:
             found = embeddings.fuse(found, vec)
-        return list(found.items())
+        return list(found.items()), vec is not None or not embeddings.available()
     if cat:
         rows = con.execute("SELECT rid FROM products WHERE category_group=? OR category=? "
                            "ORDER BY offer_count DESC LIMIT ?", (cat, cat, CANDIDATES)).fetchall()
     else:
         rows = con.execute("SELECT rid FROM products ORDER BY offer_count DESC LIMIT ?", (CANDIDATES,)).fetchall()
-    return [(r[0], -float(i)) for i, r in enumerate(rows)]
+    return [(r[0], -float(i)) for i, r in enumerate(rows)], True
 
 
 def _load(rids: list[int]) -> tuple[dict, dict[str, list[_Seller]]]:
@@ -219,7 +247,9 @@ def _card(prod: dict, passing: list[_Seller], all_sellers: list[_Seller], origin
             freshest, changed = t, s.changed
     dists = sorted(haversine_m(origin[0], origin[1], s.lat, s.lng) for s in passing) if origin else []
     radius_m = (p.radius or NEARBY_KM) * 1000
-    nearby = sum(1 for d in dists if d <= radius_m) if origin else None
+    # Distinct shops: a shop can list a product twice, and «۲۹ فروشنده در ۳ کیلومتری» under «۲۸ فروشنده» reads as a bug.
+    nearby = len({s.shop_id for s in passing if haversine_m(origin[0], origin[1], s.lat, s.lng) <= radius_m}) \
+        if origin else None
     shops = {s.shop_id for s in all_sellers}
     reasons = []
     if origin and nearby:
@@ -370,12 +400,10 @@ def search(p: Params, at: datetime) -> SearchOut:
                       sort=p.sort if p.sort in SORTS else "relevance", boost=list(p.boost))
 
     text = pq.text
-    cands = _candidates(text, p.cat)
-    if not cands:
+    rel, prods, sellers = _pool(text, p.cat)
+    if not rel:
         return SearchOut(query=p.q, text=text, understood_chips=chips, items=[], total=0, page=p.page,
                          has_more=False, applied=applied, relax=None)
-    rel = {rid: s for rid, s in cands}
-    prods, sellers = _load(list(rel))
     run = _run(prods, sellers, p, at, origin)
     snap = snapshot()
 
@@ -415,9 +443,8 @@ def search(p: Params, at: datetime) -> SearchOut:
         relax = Chip(key=best.key, label=best.action, value=best.value) if best else None
 
     facets = _facets([c[0] for c in cards], [prods[pid] for pid, _ in run.unbranded])
-    # Budget bands from the dominant category of the top results, so «گوشی» isn't priced by its accessories.
-    top_cats = [c[0]["category"] for c in cards[:40]]
-    main_cat = max(set(top_cats), key=top_cats.count) if top_cats else None
+    # Budget bands and the «کاربرد» question use the main category, so «گوشی» isn't priced by its accessories.
+    main_cat = _main_category(text, [c[0] for c in cards])
     mins = sorted(c[1].price_range.min for c in cards if c[1].price_range.min and c[0]["category"] == main_cat)
     quartiles = [mins[int(len(mins) * q)] for q in (0.25, 0.5, 0.75)] if len(mins) >= 8 else []
     start = (p.page - 1) * PAGE_SIZE
@@ -428,7 +455,21 @@ def search(p: Params, at: datetime) -> SearchOut:
                      unknown_sellers={k: len(v) for k, v in run.unknown_sellers.items()},
                      facets=facets, price_quartiles=quartiles, price_bounds=_price_bounds(prods.values(), p.cat),
                      relax=relax, relax_options=options, relax_note=note,
-                     needfinder=_use_question(len(cards), p, [c[0] for c in cards]) + _needfinder(len(cards), p, quartiles, facets["brand"]))
+                     needfinder=_use_question(len(cards), p, [c[0] for c in cards], main_cat) + _needfinder(len(cards), p, quartiles, facets["brand"]))
+
+
+def _main_category(text: str, prods: list[dict]) -> str | None:
+    """The category the query names («گوشی …» → گوشی موبایل) when results have it; else the most common one in
+    the top 12. Counting the top 40 picked «فلت و برد گوشی» for «گوشی سامسونگ زیر ۶۰ میلیون اقساطی», where
+    only five phones pass the filters and parts fill the rest."""
+    present = {pr["category"] for pr in prods}
+    tokens = [t for t in text.split() if len(t) > 1]
+    named = [name for name, norm in _category_names() if name in present and head_match(tokens, norm)]
+    if named:
+        sizes = _category_sizes()
+        return max(named, key=lambda n: sizes.get(n, 0))
+    top = [pr["category"] for pr in prods[:12]]
+    return max(set(top), key=top.count) if top else None
 
 
 USE_SYSTEM = ("برای خریدار یک فروشگاه در تهران، یک سؤال کوتاه فارسی درباره‌ی «کاربرد» این دسته‌ی کالا بساز با ۳ گزینه. "
@@ -436,14 +477,12 @@ USE_SYSTEM = ("برای خریدار یک فروشگاه در تهران، یک 
               'خروجی JSON: {"question": "...", "options": [{"label": "...", "keywords": ["..."]}]}')
 
 
-def _use_question(total: int, p: Params, prods: list[dict]) -> list[NeedQuestion]:
+def _use_question(total: int, p: Params, prods: list[dict], cat: str | None) -> list[NeedQuestion]:
     """LLM «برای چه کاری؟» question (PRODUCT_SPEC F4), cached per category and computed in the background.
     Only options whose keywords match at least two current titles are offered, so every answer changes ranking."""
     from app import llm
-    if total <= NEEDFINDER_MIN or p.boost or not prods:
+    if total <= NEEDFINDER_MIN or p.boost or not prods or not cat:
         return []
-    cats = [pr["category"] for pr in prods[:40]]
-    cat = max(set(cats), key=cats.count)
     sample = [pr["title_fa"][:70] for pr in prods if pr["category"] == cat][:30]
     out = llm.cached_or_background("needfinder_use", cat, lambda: llm.chat_json_sync(
         USE_SYSTEM, json.dumps({"category": cat, "titles": sample}, ensure_ascii=False), max_tokens=260))

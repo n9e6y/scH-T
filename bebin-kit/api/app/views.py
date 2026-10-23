@@ -24,8 +24,11 @@ def snapshot() -> datetime:
 
 def week_of(row) -> dict[int, list[tuple[int, int]]] | None:
     raw = row["hours_json"]
-    if not raw:
-        return None
+    return _parse_week(raw) if raw else None
+
+
+@lru_cache(maxsize=8192)  # ~6.5k shops; search parses hours for every candidate seller. Callers only read it.
+def _parse_week(raw: str) -> dict[int, list[tuple[int, int]]]:
     return {int(k): [tuple(r) for r in v] for k, v in json.loads(raw).items()}
 
 

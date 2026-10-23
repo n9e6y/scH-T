@@ -33,7 +33,7 @@ function Price({ row }: { row: Row }) {
   const p = row.price;
   if (p.kind === "verified" && p.value) {
     return (
-      <div className="flex flex-col items-end gap-1">
+      <div className="flex flex-none flex-col items-end gap-1">
         <div className="flex items-center gap-1.5">
           <MiniStamp size={28} />
           <span className="tabular text-base font-extrabold whitespace-nowrap text-stamp">{faNum(p.value)} <span className="text-[11px] font-semibold">تومان</span></span>
@@ -58,7 +58,8 @@ function Price({ row }: { row: Row }) {
 export function PlaceBlock({ row }: { row: Row }) {
   const place = placeLine(row.shop);
   return (
-    <div className="flex max-w-[52%] min-w-0 flex-none flex-col gap-[3px]">
+    // Shrinks (the name wraps) so a verified price, stamp + number, never pushes past the card edge.
+    <div className="flex max-w-[52%] min-w-0 flex-initial flex-col gap-[3px]">
       <span className="text-[15.5px] leading-normal font-bold">{row.shop.name}</span>
       {place && <span className="text-xs leading-[1.6] text-stem">{place}</span>}
       {row.shop.location.state === "mall_only" && (

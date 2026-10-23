@@ -19,6 +19,10 @@ from app.db import catalog
 
 log = logging.getLogger("bebin.embeddings")
 RRF_K = 60
+# Vector hits must score within this of the best one. Cosines shift per query (top 0.61–0.74), so the floor is
+# relative. Without it, a strict filter that removes every real match lets far neighbours through: «اسپیکر
+# جی بی ال زیر ۳ میلیون» showed AirPod covers (0.135 below the top) instead of the empty state.
+REL_FLOOR = 0.10
 QUERY_TIMEOUT = 2.5  # the provider answers in ~1.1–1.4 s; past this, FTS alone is the better experience
 
 
@@ -133,7 +137,9 @@ def search(text: str, k: int) -> list[int] | None:
     sc = _scores(v)
     sc[idx.rids < 0] = -2.0
     top = np.argpartition(-sc, min(k, len(sc) - 1))[:k]
-    return [int(idx.rids[i]) for i in top[np.argsort(-sc[top])] if idx.rids[i] >= 0]
+    top = top[np.argsort(-sc[top])]
+    floor = sc[top[0]] - REL_FLOOR
+    return [int(idx.rids[i]) for i in top if sc[i] >= floor]
 
 
 def similarity(rid: int, others: list[int]) -> dict[int, float] | None:

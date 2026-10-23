@@ -24,10 +24,23 @@ function patch(qc: QueryClient, inq: InquiryOut) {
   qc.invalidateQueries({ queryKey: ["inquiries"] });
 }
 
+const POLL_MS = 8_000;
+
 export function useLiveEvents(onReply: (inq: InquiryOut, type: string) => void) {
   const qc = useQueryClient();
   useEffect(() => {
-    const es = new EventSource(`${API_BASE}/api/events?session_id=${encodeURIComponent(getSessionId())}`);
+    // PRODUCT_SPEC §6: auto-reconnect with a polling fallback. EventSource retries a dropped connection itself
+    // but gives up for good after an HTTP error (readyState CLOSED), so that case reopens with backoff; while
+    // disconnected, the list and the open thread are refetched every POLL_MS.
+    let es: EventSource | null = null;
+    let retry: ReturnType<typeof setTimeout> | undefined;
+    let backoff = 2_000;
+    const poll = setInterval(() => {
+      if (useLiveState.getState().connected) return;
+      qc.invalidateQueries({ queryKey: ["inquiries"] });
+      const viewing = useLiveState.getState().viewing;
+      if (viewing) qc.invalidateQueries({ queryKey: ["inquiry", viewing] });
+    }, POLL_MS);
     const handle = (e: MessageEvent) => {
       let ev: LiveEvent;
       try { ev = JSON.parse(e.data); } catch { return; }
@@ -38,11 +51,29 @@ export function useLiveEvents(onReply: (inq: InquiryOut, type: string) => void) 
         if (useLiveState.getState().viewing !== ev.inquiry.id) onReply(ev.inquiry, ev.type);
       }
     };
-    for (const t of ["created", "delivered", "seen", "answered", "no_answer", "nudged", "cancelled", "replay"]) {
-      es.addEventListener(t, handle as EventListener);
-    }
-    es.onopen = () => useLiveState.getState().set({ connected: true });
-    es.onerror = () => useLiveState.getState().set({ connected: false });
-    return () => es.close();
+    const open = () => {
+      const src = new EventSource(`${API_BASE}/api/events?session_id=${encodeURIComponent(getSessionId())}`);
+      es = src;
+      for (const t of ["created", "delivered", "seen", "answered", "no_answer", "nudged", "cancelled", "replay"]) {
+        src.addEventListener(t, handle as EventListener);
+      }
+      src.onopen = () => {
+        backoff = 2_000;
+        useLiveState.getState().set({ connected: true });
+      };
+      src.onerror = () => {
+        useLiveState.getState().set({ connected: false });
+        if (src.readyState === EventSource.CLOSED) {
+          retry = setTimeout(open, backoff);
+          backoff = Math.min(backoff * 2, 30_000);
+        }
+      };
+    };
+    open();
+    return () => {
+      clearInterval(poll);
+      clearTimeout(retry);
+      es?.close();
+    };
   }, [qc, onReply]);
 }

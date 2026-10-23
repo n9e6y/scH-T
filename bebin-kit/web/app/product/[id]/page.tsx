@@ -4,7 +4,7 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { BottomNav, useToasts } from "@/components/chrome";
 import { CompareTray } from "@/components/compare-tray";
 import { Check, ChevronDown, ChevronForward, NavAssistant } from "@/components/icons";
@@ -33,9 +33,11 @@ function Gallery({ images, onBack }: { images: string[]; onBack: () => void }) {
       {images.length ? (
         <div ref={ref} dir="ltr" className="no-scrollbar flex h-full snap-x snap-mandatory overflow-x-auto"
           onScroll={(e) => setI(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}>
-          {images.map((src) => (
+          {images.map((src, n) => (
+            // The first image is the LCP element: fetch it first; the rest wait until swiped near.
             // eslint-disable-next-line @next/next/no-img-element
-            <img key={src} src={src} alt="" className="h-full w-full flex-none snap-center object-contain p-6" />
+            <img key={src} src={src} alt="" loading={n ? "lazy" : "eager"} fetchPriority={n ? "auto" : "high"}
+              className="h-full w-full flex-none snap-center object-contain p-6" />
           ))}
         </div>
       ) : (
@@ -120,8 +122,19 @@ function ProductPage() {
     queryKey: ["sellers", id, "balanced", loc?.lat, loc?.lng, "", false],
     queryFn: () => api<SellersOut>(`/products/${id}/sellers`, { lat: loc?.lat, lng: loc?.lng }),
   });
+  // Similar products (and their 100–300 KB images) load only when the strip nears the viewport: fetched
+  // up front they competed with the hero image and pushed mobile LCP to ~5 s (Lighthouse).
+  const [similarNear, setSimilarNear] = useState(false);
+  const similarSentinel = useCallback((el: HTMLDivElement | null) => {
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setSimilarNear(true); io.disconnect(); } },
+      { rootMargin: "400px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
   const similar = useQuery({
     queryKey: ["similar", id, loc?.lat], queryFn: () => api<ProductCard[]>(`/products/${id}/similar`, { k: 8, lat: loc?.lat, lng: loc?.lng }),
+    enabled: similarNear,
   });
   const p = detail.data;
   useEffect(() => {
@@ -204,7 +217,18 @@ function ProductPage() {
                 <span className="text-[11.5px] text-stem">ترتیب: متعادل</span>
               </div>
               <div className="overflow-hidden rounded-card bg-card">
-                {sellers.isLoading && <div className="h-40 bg-mist" aria-busy />}
+                {sellers.isLoading && [0, 1, 2].map((i) => (
+                  <div key={i} className="flex flex-col gap-2 border-b border-line px-3.5 py-3.5" aria-busy>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="h-3.5 w-28 rounded-full bg-line" />
+                      <span className="h-3.5 w-24 rounded-full bg-line" />
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="h-3 w-44 rounded-full bg-mist" />
+                      <span className="h-6 w-16 rounded-full bg-mist" />
+                    </div>
+                  </div>
+                ))}
                 {top.map((r) => (
                   <Link key={r.shop.id} href={`/product/${id}/sellers`} className="flex flex-col gap-1.5 border-b border-line px-3.5 py-3">
                     <div className="flex items-center gap-2">
@@ -230,6 +254,7 @@ function ProductPage() {
               </div>
             </section>
 
+            <div ref={similarSentinel} aria-hidden />
             {!!similar.data?.length && (
               <section className="flex flex-col gap-2.5">
                 <h2 className="px-5 text-base font-bold">کالاهای مشابه</h2>
